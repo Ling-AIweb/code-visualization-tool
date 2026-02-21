@@ -174,7 +174,7 @@ export default function ProjectDetailsPage() {
         <div className="max-w-7xl mx-auto">
           {/* 页面标题 */}
           <div className="mb-8">
-            <h1 className="hero-title mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
               代码可视化
             </h1>
             <p className="text-lg opacity-60">
