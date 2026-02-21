@@ -1,0 +1,334 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  body {
+    @apply text-white;
+    background-color: #000000;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 cursor-pointer rounded-none
+           transition-all duration-300;
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 2px solid #FFFFFF;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-primary:hover {
+    background-color: #000000;
+    color: #FFFFFF;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .btn-primary:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  .btn-cta {
+    @apply px-8 py-4 font-semibold cursor-pointer rounded-none
+           transition-all duration-300;
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 2px solid #FFFFFF;
+  }
+  
+  .btn-cta:hover {
+    background-color: #000000;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 font-semibold cursor-pointer rounded-none
+           transition-all duration-300;
+    background-color: transparent;
+    color: #FFFFFF;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0);
+    transition: left 0.3s ease;
+    z-index: -1;
+  }
+
+  .btn-secondary:hover::before {
+    left: 0;
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+  }
+
+  .card {
+    @apply p-8 transition-all duration-300 cursor-pointer rounded-none;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .card:hover {
+    transform: translateY(-8px);
+    background-color: #FFFFFF;
+    color: #000000;
+  }
+
+  .card-static {
+    @apply p-6 rounded-none;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-transparent border border-white/30 font-body
+           focus:outline-none focus:border-white rounded-none
+           transition-all duration-300
+           placeholder:text-white/50 text-white;
+  }
+
+  .dark-nav {
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Hero Title */
+.hero-title {
+  font-size: clamp(4rem, 10vw, 8rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+/* Section Title */
+.section-title {
+  font-size: clamp(2rem, 6vw, 5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Marquee Text */
+.marquee-text {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+/* Fade In Animation */
+.fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-1 {
+  animation-delay: 0.2s;
+}
+
+.stagger-2 {
+  animation-delay: 0.4s;
+}
+
+.stagger-3 {
+  animation-delay: 0.6s;
+}
+
+/* Architecture Visualization Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+/* Shadow Clay Effect */
+.shadow-clay {
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-clay-sm {
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-clay-hover {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-clay-pressed {
+  box-shadow: 
+    0 0 0 rgba(0, 0, 0, 0),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Blob Animation */
+@keyframes blob {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 8s ease-in-out infinite;
+}
+
+/* Border Thin */
+.border-thin {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Text Outline Effect */
+.text-outline {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+  color: transparent;
+}
+
+/* Upload Zone */
+.upload-zone {
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
+}
+
+.upload-zone:hover {
+  border-color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: scale(1.02);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+}
+
+.upload-zone:hover .text-6xl {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+/* Card Hover Effect */
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.card-hover:hover .card-icon {
+  color: #000000;
+}
+
+.card-hover:hover .card-text {
+  color: #000000;
+}
+
+/* Marquee Animation */
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: inline-block;
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pulse Animation for Loading */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

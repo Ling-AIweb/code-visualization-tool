@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion 风格 - AI 开发代理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background-color: #FFFFFF;
+            color: #37352F;
+        }
+        
+        .notion-card {
+            background: #FFFFFF;
+            border: 1px solid #E9E9E7;
+            border-radius: 4px;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .notion-card:hover {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .notion-input {
+            background: #F7F7F5;
+            border: 1px solid #E9E9E7;
+            border-radius: 4px;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        
+        .notion-input:focus {
+            background: #FFFFFF;
+            border-color: #2383E2;
+            outline: none;
+        }
+        
+        .notion-button {
+            background: #2383E2;
+            color: #FFFFFF;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        
+        .notion-button:hover {
+            background: #1A6BC2;
+        }
+        
+        .notion-sidebar {
+            background: #F7F7F5;
+            border-right: 1px solid #E9E9E7;
+        }
+        
+        .notion-tag {
+            background: #F7F6F3;
+            color: #37352F;
+            border-radius: 3px;
+            font-size: 13px;
+            padding: 2px 8px;
+        }
+        
+        .notion-divider {
+            border-top: 1px solid #E9E9E7;
+        }
+        
+        .notion-text {
+            line-height: 1.5;
+            color: #37352F;
+        }
+        
+        .notion-text-secondary {
+            color: #787774;
+        }
+        
+        .notion-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .page-icon {
+            font-size: 78px;
+            margin-bottom: 16px;
+        }
+        
+        .breadcrumb-item {
+            color: #787774;
+            font-size: 14px;
+        }
+        
+        .breadcrumb-item:hover {
+            color: #37352F;
+        }
+        
+        .block-hover {
+            transition: background 0.1s ease;
+        }
+        
+        .block-hover:hover {
+            background: #F7F7F5;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #E9E9E7;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D3D1CB;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="notion-sidebar w-60 flex-shrink-0 flex flex-col">
+            <div class="p-4">
+                <div class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-200 cursor-pointer transition-colors">
+                    <div class="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+                    <span class="text-sm font-medium">AI 开发代理</span>
+                </div>
+            </div>
+            
+            <div class="px-3 py-2">
+                <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-gray-200 cursor-pointer transition-colors">
+                    <div class="flex items-center gap-2">
+                        <svg class="notion-icon text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        <span class="text-sm">首页</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-3 py-2">
+                <div class="text-xs font-medium text-gray-500 px-2 py-1">项目</div>
+                <div class="flex items-center gap-2 px-2 py-1 rounded bg-gray-200 cursor-pointer">
+                    <span class="text-sm">🏗️</span>
+                    <span class="text-sm font-medium">代码架构可视化</span>
+                </div>
+                <div class="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-200 cursor-pointer transition-colors mt-1">
+                    <span class="text-sm">💬</span>
+                    <span class="text-sm">群聊剧本生成</span>
+                </div>
+                <div class="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-200 cursor-pointer transition-colors mt-1">
+                    <span class="text-sm">📚</span>
+                    <span class="text-sm">术语解释</span>
+                </div>
+            </div>
+            
+            <div class="mt-auto p-4">
+                <div class="notion-divider my-3"></div>
+                <div class="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-200 cursor-pointer transition-colors">
+                    <svg class="notion-icon text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-sm">设置</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="max-w-4xl mx-auto px-24 py-16">
+                <!-- Breadcrumb -->
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="breadcrumb-item cursor-pointer">AI 开发代理</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="breadcrumb-item cursor-pointer">项目</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-sm font-medium">代码架构可视化</span>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="mb-8">
+                    <div class="page-icon">🏗️</div>
+                    <h1 class="text-4xl font-bold mb-4 notion-text">代码架构可视化</h1>
+                    <p class="notion-text-secondary text-lg">
+                        将复杂的代码逻辑转化为小白可理解的生活化比喻与拟人化群聊
+                    </p>
+                </div>
+                
+                <!-- Tags -->
+                <div class="flex gap-2 mb-8">
+                    <span class="notion-tag">代码解析</span>
+                    <span class="notion-tag">架构可视化</span>
+                    <span class="notion-tag">生活化比喻</span>
+                </div>
+                
+                <div class="notion-divider my-8"></div>
+                
+                <!-- Upload Section -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4 notion-text">上传代码</h2>
+                    <div class="notion-card p-8">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
+                            <div class="mb-4">
+                                <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </div>
+                            <p class="notion-text mb-2">拖拽代码压缩包到这里</p>
+                            <p class="notion-text-secondary text-sm mb-4">或点击选择文件，支持 ZIP 格式</p>
+                            <input type="file" accept=".zip" class="hidden">
+                            <button class="notion-button px-4 py-2 text-sm font-medium">
+                                选择文件
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Features Section -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4 notion-text">核心功能</h2>
+                    <div class="space-y-3">
+                        <div class="notion-card p-4 block-hover">
+                            <div class="flex items-start gap-3">
+                                <span class="text-xl">📊</span>
+                                <div>
+                                    <h3 class="font-semibold notion-text">架构分层</h3>
+                                    <p class="notion-text-secondary text-sm mt-1">看看系统是怎么一层层搭起来的</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="notion-card p-4 block-hover">
+                            <div class="flex items-start gap-3">
+                                <span class="text-xl">💬</span>
+                                <div>
+                                    <h3 class="font-semibold notion-text">服务聊天</h3>
+                                    <p class="notion-text-secondary text-sm mt-1">看看各个模块之间怎么"说话"</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="notion-card p-4 block-hover">
+                            <div class="flex items-start gap-3">
+                                <span class="text-xl">📚</span>
+                                <div>
+                                    <h3 class="font-semibold notion-text">名词解释</h3>
+                                    <p class="notion-text-secondary text-sm mt-1">用大白话解释技术术语</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- How it works -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4 notion-text">如何使用</h2>
+                    <div class="notion-card p-6">
+                        <ol class="space-y-3">
+                            <li class="flex gap-3">
+                                <span class="notion-text-secondary font-medium">1.</span>
+                                <span class="notion-text">上传你的代码压缩包（ZIP 格式）</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="notion-text-secondary font-medium">2.</span>
+                                <span class="notion-text">AI 自动分析代码结构和依赖关系</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="notion-text-secondary font-medium">3.</span>
+                                <span class="notion-text">生成可视化的架构图和群聊剧本</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="notion-text-secondary font-medium">4.</span>
+                                <span class="notion-text">用生活化的比喻理解代码逻辑</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <!-- Example -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4 notion-text">示例</h2>
+                    <div class="notion-card p-6">
+                        <div class="bg-gray-50 rounded p-4 mb-4">
+                            <p class="notion-text-secondary text-sm mb-2">比喻场景：餐厅</p>
+                            <p class="notion-text">将代码系统想象成一家餐厅：</p>
+                            <ul class="mt-2 space-y-1 notion-text-secondary text-sm">
+                                <li>• <strong>API 接口</strong> = 餐厅前台</li>
+                                <li>• <strong>数据库</strong> = 食材仓库</li>
+                                <li>• <strong>业务逻辑</strong> = 厨师烹饪</li>
+                                <li>• <strong>缓存</strong> = 备菜台</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

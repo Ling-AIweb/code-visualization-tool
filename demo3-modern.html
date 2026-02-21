@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 开发代理 - 现代简洁版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#F5F3FF',
+                            100: '#EDE9FE',
+                            200: '#DDD6FE',
+                            300: '#C4B5FD',
+                            400: '#A78BFA',
+                            500: '#8B5CF6',
+                            600: '#7C3AED',
+                            700: '#6D28D9',
+                            800: '#5B21B6',
+                            900: '#4C1D95',
+                        },
+                        accent: {
+                            50: '#ECFEFF',
+                            100: '#CFFAFE',
+                            200: '#A5F3FC',
+                            300: '#67E8F9',
+                            400: '#22D3EE',
+                            500: '#06B6D4',
+                            600: '#0891B2',
+                            700: '#0E7490',
+                            800: '#155E75',
+                            900: '#164E63',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #FAF5FF 0%, #F0F9FF 50%, #ECFEFF 100%);
+        }
+        
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            animation: blob-float 8s ease-in-out infinite;
+        }
+        
+        @keyframes blob-float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-connector {
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #DDD6FE 0%, transparent 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .step-connector {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen relative overflow-x-hidden">
+    <!-- Background Blobs -->
+    <div class="blob w-96 h-96 bg-primary-300 top-0 left-0" style="animation-delay: 0s;"></div>
+    <div class="blob w-96 h-96 bg-accent-300 top-1/2 right-0" style="animation-delay: -3s;"></div>
+    <div class="blob w-80 h-80 bg-primary-400 bottom-0 left-1/3" style="animation-delay: -5s;"></div>
+    
+    <div class="max-w-7xl mx-auto px-6 py-12 relative z-10">
+        <!-- Navigation -->
+        <nav class="glass-card rounded-2xl px-6 py-4 mb-12 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+                    <span class="text-white text-xl">✨</span>
+                </div>
+                <span class="font-bold text-xl text-gray-900">AI 开发代理</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="text-gray-600 hover:text-gray-900 font-medium transition-colors">功能</button>
+                <button class="text-gray-600 hover:text-gray-900 font-medium transition-colors">案例</button>
+                <button class="bg-gradient-to-r from-primary-500 to-accent-500 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all">
+                    立即试用
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-16 fade-in">
+            <div class="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <span class="w-2 h-2 rounded-full bg-primary-500 pulse-ring"></span>
+                智能代码解析 · 生活化比喻 · 拟人化呈现
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+                让代码<span class="gradient-text">会说话</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+                将复杂的代码逻辑转化为小白可理解的生活化比喻与拟人化群聊。
+                不懂技术？没关系，我们让代码自己讲故事。
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="bg-gradient-to-r from-primary-600 to-accent-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-xl hover:shadow-primary-500/30 transition-all hover-lift">
+                    开始体验 →
+                </button>
+                <button class="glass-card text-gray-700 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white transition-all hover-lift">
+                    观看演示
+                </button>
+            </div>
+        </div>
+        
+        <!-- Features Grid -->
+        <div class="grid md:grid-cols-3 gap-6 mb-16">
+            <div class="glass-card rounded-2xl p-8 hover-lift">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mb-6">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">代码解析</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    自动分析代码结构，提取关键逻辑，生成易于理解的摘要信息
+                </p>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-8 hover-lift">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center mb-6">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">拟人化群聊</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    将代码元素转化为性格各异的虚拟角色，通过对话展示执行流程
+                </p>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-8 hover-lift">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center mb-6">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">生活化比喻</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    用日常生活中的场景解释技术概念，让抽象逻辑变得具体可感
+                </p>
+            </div>
+        </div>
+        
+        <!-- How It Works -->
+        <div class="glass-card rounded-3xl p-8 md:p-12 mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">工作流程</h2>
+                <p class="text-gray-600">简单三步，让代码变得生动有趣</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 relative">
+                <!-- Step 1 -->
+                <div class="text-center relative">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white text-2xl font-bold mb-6">
+                        1
+                    </div>
+                    <div class="step-connector hidden md:block"></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">上传代码</h3>
+                    <p class="text-gray-600">
+                        支持多种编程语言，拖拽或选择文件即可开始
+                    </p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="text-center relative">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-accent-500 to-accent-600 text-white text-2xl font-bold mb-6">
+                        2
+                    </div>
+                    <div class="step-connector hidden md:block"></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">AI 分析</h3>
+                    <p class="text-gray-600">
+                        智能解析代码结构，生成生活化比喻和角色设定
+                    </p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 text-white text-2xl font-bold mb-6">
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">查看剧本</h3>
+                    <p class="text-gray-600">
+                        获得拟人化群聊剧本，轻松理解代码逻辑
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CTA Section -->
+        <div class="glass-card rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-accent-500/10"></div>
+            <div class="relative z-10">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    准备好让代码活起来了吗？
+                </h2>
+                <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                    立即体验 AI 开发代理，用全新的方式理解代码
+                </p>
+                <button class="bg-gradient-to-r from-primary-600 to-accent-500 text-white px-10 py-4 rounded-2xl font-semibold text-lg hover:shadow-xl hover:shadow-primary-500/30 transition-all hover-lift">
+                    免费开始 →
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-16 text-center text-gray-500 text-sm">
+            <p>© 2024 AI 开发代理. 让每个人都能理解代码</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zara Faces 风格 - AI 开发代理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            overflow-x: hidden;
+        }
+        
+        .hero-title {
+            font-size: clamp(3rem, 12vw, 10rem);
+            font-weight: 700;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
+        }
+        
+        .section-title {
+            font-size: clamp(2rem, 6vw, 5rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+        
+        .marquee-text {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-weight: 600;
+            white-space: nowrap;
+            letter-spacing: -0.01em;
+        }
+        
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+        
+        .card-hover:hover .card-icon {
+            color: #000000;
+        }
+        
+        .card-hover:hover .card-text {
+            color: #000000;
+        }
+        
+        .btn-primary {
+            background-color: #FFFFFF;
+            color: #000000;
+            border: 2px solid #FFFFFF;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: #FFFFFF;
+            border: 2px solid #FFFFFF;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+        
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+        
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 {
+            animation-delay: 0.2s;
+        }
+        
+        .stagger-2 {
+            animation-delay: 0.4s;
+        }
+        
+        .stagger-3 {
+            animation-delay: 0.6s;
+        }
+        
+        .border-thin {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+            color: transparent;
+        }
+        
+        .upload-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-zone:hover {
+            border-color: #FFFFFF;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                    <span class="text-black font-bold text-lg">AI</span>
+                </div>
+                <span class="text-xl font-bold tracking-tight">CODE</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#" class="text-sm hover:text-gray-300 transition-colors">功能</a>
+                <a href="#" class="text-sm hover:text-gray-300 transition-colors">案例</a>
+                <a href="#" class="text-sm hover:text-gray-300 transition-colors">关于</a>
+            </div>
+            <button class="btn-primary px-6 py-2 text-sm font-semibold rounded-none">
+                开始使用
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col justify-center items-center px-6 pt-20">
+        <div class="max-w-7xl mx-auto w-full">
+            <div class="text-center mb-12">
+                <p class="text-sm tracking-[0.3em] uppercase mb-6 opacity-60 fade-in">
+                    AI-Powered Code Understanding
+                </p>
+                <h1 class="hero-title mb-8 fade-in stagger-1">
+                    让代码<br/>
+                    <span class="text-outline">会说话</span>
+                </h1>
+                <p class="text-lg max-w-2xl mx-auto opacity-80 leading-relaxed fade-in stagger-2">
+                    将复杂的代码逻辑转化为小白可理解的<br/>
+                    生活化比喻与拟人化群聊
+                </p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in stagger-3">
+                <button class="btn-primary px-10 py-4 text-lg font-semibold">
+                    立即体验
+                </button>
+                <button class="btn-secondary px-10 py-4 text-lg font-semibold">
+                    了解更多
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Marquee -->
+    <div class="border-y border-white/20 py-6 overflow-hidden">
+        <div class="marquee-container">
+            <div class="marquee-content">
+                <span class="marquee-text">
+                    代码解析 • 架构可视化 • 生活化比喻 • 拟人化群聊 • 
+                    代码解析 • 架构可视化 • 生活化比喻 • 拟人化群聊 • 
+                    代码解析 • 架构可视化 • 生活化比喻 • 拟人化群聊 • 
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <section class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="section-title mb-16">
+                核心功能
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card-hover border-thin p-8 cursor-pointer">
+                    <div class="text-5xl mb-6 card-icon">🏗️</div>
+                    <h3 class="text-2xl font-bold mb-4">架构分层</h3>
+                    <p class="opacity-70 card-text leading-relaxed">
+                        看看系统是怎么一层层搭起来的
+                    </p>
+                </div>
+                
+                <div class="card-hover border-thin p-8 cursor-pointer">
+                    <div class="text-5xl mb-6 card-icon">💬</div>
+                    <h3 class="text-2xl font-bold mb-4">服务聊天</h3>
+                    <p class="opacity-70 card-text leading-relaxed">
+                        看看各个模块之间怎么"说话"
+                    </p>
+                </div>
+                
+                <div class="card-hover border-thin p-8 cursor-pointer">
+                    <div class="text-5xl mb-6 card-icon">📚</div>
+                    <h3 class="text-2xl font-bold mb-4">名词解释</h3>
+                    <p class="opacity-70 card-text leading-relaxed">
+                        用大白话解释技术术语
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Upload Section -->
+    <section class="py-24 px-6 bg-white text-black">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="section-title mb-8">
+                上传代码
+            </h2>
+            <p class="text-lg opacity-70 mb-12">
+                拖拽你的代码压缩包，AI 将自动生成架构可视化
+            </p>
+            
+            <div class="upload-zone p-16 text-center cursor-pointer">
+                <div class="text-6xl mb-6">📁</div>
+                <p class="text-2xl font-bold mb-4">拖拽文件到这里</p>
+                <p class="opacity-60 mb-8">或点击选择文件，支持 ZIP 格式</p>
+                <button class="bg-black text-white px-8 py-4 text-lg font-semibold hover:bg-gray-800 transition-colors">
+                    选择文件
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="section-title mb-16">
+                如何使用
+            </h2>
+            
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="text-6xl font-bold opacity-20 mb-4">01</div>
+                    <h3 class="text-xl font-bold mb-2">上传代码</h3>
+                    <p class="opacity-60">上传 ZIP 格式的代码压缩包</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-6xl font-bold opacity-20 mb-4">02</div>
+                    <h3 class="text-xl font-bold mb-2">AI 分析</h3>
+                    <p class="opacity-60">自动分析代码结构</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-6xl font-bold opacity-20 mb-4">03</div>
+                    <h3 class="text-xl font-bold mb-2">生成可视化</h3>
+                    <p class="opacity-60">生成架构图和群聊剧本</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-6xl font-bold opacity-20 mb-4">04</div>
+                    <h3 class="text-xl font-bold mb-2">理解代码</h3>
+                    <p class="opacity-60">用生活化比喻理解逻辑</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Example Section -->
+    <section class="py-24 px-6 bg-white text-black">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="section-title mb-16">
+                示例场景
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="border border-black/20 p-8 hover:border-black transition-colors">
+                    <div class="text-4xl mb-4">🍽️</div>
+                    <h3 class="text-2xl font-bold mb-4">餐厅比喻</h3>
+                    <p class="opacity-70 leading-relaxed">
+                        API 接口 = 餐厅前台<br/>
+                        数据库 = 食材仓库<br/>
+                        业务逻辑 = 厨师烹饪<br/>
+                        缓存 = 备菜台
+                    </p>
+                </div>
+                
+                <div class="border border-black/20 p-8 hover:border-black transition-colors">
+                    <div class="text-4xl mb-4">🏭</div>
+                    <h3 class="text-2xl font-bold mb-4">工厂比喻</h3>
+                    <p class="opacity-70 leading-relaxed">
+                        函数 = 工位<br/>
+                        参数 = 原材料<br/>
+                        返回值 = 成品<br/>
+                        调用 = 流水线
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t border-white/20">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                    <span class="text-black font-bold text-sm">AI</span>
+                </div>
+                <span class="font-bold">CODE</span>
+            </div>
+            <p class="opacity-60 text-sm">© 2024 AI Code Understanding. 让每个人都能看懂代码。</p>
+        </div>
+    </footer>
+</body>
+</html>

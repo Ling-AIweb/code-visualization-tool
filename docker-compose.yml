@@ -1,0 +1,41 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: code-viz-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - API_KEY=${API_KEY:-your_api_key_here}
+      - API_BASE=${API_BASE:-https://api.openai.com/v1}
+      - MODEL_NAME=${MODEL_NAME:-gpt-4}
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+      - HOST=0.0.0.0
+      - PORT=8000
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3003}
+    volumes:
+      - ./backend/chroma_db:/app/chroma_db
+      - ./backend/uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: code-viz-frontend
+    ports:
+      - "3003:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:8000
+    restart: unless-stopped
+
+volumes:
+  chroma_db_data:

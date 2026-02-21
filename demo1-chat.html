@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码拟人化群聊 - AI 开发代理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pop-yellow: #FFDE59;
+            --bright-red: #FF5757;
+            --electric-blue: #39FF14;
+            --deep-purple: #BF00FF;
+        }
+        
+        body {
+            font-family: 'Comic Neue', cursive;
+        }
+        
+        .font-display {
+            font-family: 'Baloo 2', cursive;
+        }
+        
+        .neubrutalism-card {
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0 #000;
+            transition: all 0.2s ease;
+        }
+        
+        .neubrutalism-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 12px 12px 0 #000;
+        }
+        
+        .btn-neubrutalism {
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0 #000;
+            transition: all 0.15s ease;
+        }
+        
+        .btn-neubrutalism:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #000;
+        }
+        
+        .btn-neubrutalism:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+        
+        .avatar-ring {
+            border: 3px solid #000;
+            animation: pulse-ring 2s infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .message-bubble {
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .message-bubble::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 10px solid transparent;
+        }
+        
+        .message-left::before {
+            left: -20px;
+            top: 15px;
+            border-right-color: #FFDE59;
+        }
+        
+        .message-right::before {
+            right: -20px;
+            top: 15px;
+            border-left-color: #39FF14;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .typing-indicator span {
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .marquee {
+            animation: marquee 20s linear infinite;
+        }
+        
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] min-h-screen">
+    <!-- Header Banner -->
+    <div class="bg-[#FFDE59] border-b-4 border-black py-2 overflow-hidden">
+        <div class="marquee whitespace-nowrap font-display text-xl font-bold text-black">
+            🎭 代码变活了！✨ 小白也能看懂技术逻辑 🎭 代码变活了！✨ 小白也能看懂技术逻辑 🎭 代码变活了！✨ 小白也能看懂技术逻辑
+        </div>
+    </div>
+    
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Hero Section -->
+        <div class="text-center mb-8">
+            <h1 class="font-display text-5xl md:text-6xl font-bold text-black mb-4">
+                🤖 代码拟人化群聊
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto">
+                把复杂的代码逻辑变成一群性格各异的「代码小人儿」的对话
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- Character Cards -->
+            <div class="neubrutalism-card bg-[#FFDE59] p-6 rounded-2xl">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="avatar-ring w-16 h-16 rounded-full bg-[#FF5757] flex items-center justify-center text-3xl">
+                        👮
+                    </div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">把关大叔</h3>
+                        <p class="text-sm font-bold">条件判断专家</p>
+                    </div>
+                </div>
+                <p class="text-gray-800">
+                    "只有满足我的条件才能通过！不然后果自负！😤"
+                </p>
+                <div class="mt-4 flex gap-2">
+                    <span class="bg-black text-[#FFDE59] px-3 py-1 rounded-full text-sm font-bold">if-else</span>
+                    <span class="bg-black text-[#FFDE59] px-3 py-1 rounded-full text-sm font-bold">switch</span>
+                </div>
+            </div>
+            
+            <div class="neubrutalism-card bg-[#39FF14] p-6 rounded-2xl">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="avatar-ring w-16 h-16 rounded-full bg-[#BF00FF] flex items-center justify-center text-3xl">
+                        🏃
+                    </div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">循环小弟</h3>
+                        <p class="text-sm font-bold">重复执行达人</p>
+                    </div>
+                </div>
+                <p class="text-gray-800">
+                    "别叫我停！我会一直跑下去直到跑不动！💪"
+                </p>
+                <div class="mt-4 flex gap-2">
+                    <span class="bg-black text-[#39FF14] px-3 py-1 rounded-full text-sm font-bold">for</span>
+                    <span class="bg-black text-[#39FF14] px-3 py-1 rounded-full text-sm font-bold">while</span>
+                </div>
+            </div>
+            
+            <div class="neubrutalism-card bg-[#BF00FF] p-6 rounded-2xl text-white">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="avatar-ring w-16 h-16 rounded-full bg-[#FFDE59] flex items-center justify-center text-3xl">
+                        📦
+                    </div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">函数管家</h3>
+                        <p class="text-sm font-bold">任务调度中心</p>
+                    </div>
+                </div>
+                <p class="text-white">
+                    "把任务交给我，我会安排得明明白白！🎯"
+                </p>
+                <div class="mt-4 flex gap-2">
+                    <span class="bg-white text-[#BF00FF] px-3 py-1 rounded-full text-sm font-bold">function</span>
+                    <span class="bg-white text-[#BF00FF] px-3 py-1 rounded-full text-sm font-bold">return</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Interface -->
+        <div class="mt-8 neubrutalism-card bg-white rounded-2xl overflow-hidden">
+            <div class="bg-black text-[#FFDE59] p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full bg-[#FF5757]"></div>
+                    <div class="w-3 h-3 rounded-full bg-[#FFDE59]"></div>
+                    <div class="w-3 h-3 rounded-full bg-[#39FF14]"></div>
+                </div>
+                <h2 class="font-display text-xl font-bold">💬 代码群聊室</h2>
+                <div class="flex gap-2">
+                    <span class="bg-[#FF5757] text-white px-3 py-1 rounded-full text-sm font-bold">3人在线</span>
+                </div>
+            </div>
+            
+            <div class="p-6 space-y-4 h-96 overflow-y-auto scrollbar-hide">
+                <!-- Message 1 -->
+                <div class="flex gap-4 message-bubble message-left">
+                    <div class="w-12 h-12 rounded-full bg-[#FF5757] flex items-center justify-center text-2xl flex-shrink-0">
+                        👮
+                    </div>
+                    <div class="bg-[#FFDE59] border-3 border-black p-4 rounded-2xl max-w-md">
+                        <p class="font-bold text-black mb-1">把关大叔</p>
+                        <p class="text-gray-800">嘿！有人要进来了！我先检查一下他的身份证号对不对！</p>
+                    </div>
+                </div>
+                
+                <!-- Message 2 -->
+                <div class="flex gap-4 message-bubble message-right justify-end">
+                    <div class="bg-[#39FF14] border-3 border-black p-4 rounded-2xl max-w-md text-right">
+                        <p class="font-bold text-black mb-1">循环小弟</p>
+                        <p class="text-gray-800">没问题的话，我就开始跑腿了！把所有数据都搬过来！</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-[#BF00FF] flex items-center justify-center text-2xl flex-shrink-0">
+                        🏃
+                    </div>
+                </div>
+                
+                <!-- Message 3 -->
+                <div class="flex gap-4 message-bubble message-left">
+                    <div class="w-12 h-12 rounded-full bg-[#FFDE59] flex items-center justify-center text-2xl flex-shrink-0">
+                        📦
+                    </div>
+                    <div class="bg-[#BF00FF] border-3 border-black p-4 rounded-2xl max-w-md text-white">
+                        <p class="font-bold mb-1">函数管家</p>
+                        <p>大家准备好了！等我把所有材料都收集齐了，再一起交给老板！</p>
+                    </div>
+                </div>
+                
+                <!-- Typing Indicator -->
+                <div class="flex gap-4 items-center">
+                    <div class="w-12 h-12 rounded-full bg-[#FFDE59] flex items-center justify-center text-2xl">
+                        👮
+                    </div>
+                    <div class="bg-gray-100 border-3 border-black px-4 py-3 rounded-2xl">
+                        <div class="typing-indicator flex gap-1">
+                            <span class="w-3 h-3 bg-black rounded-full"></span>
+                            <span class="w-3 h-3 bg-black rounded-full"></span>
+                            <span class="w-3 h-3 bg-black rounded-full"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="bg-gray-50 border-t-4 border-black p-4">
+                <div class="flex gap-4">
+                    <input type="text" placeholder="上传代码文件，看看代码小人怎么说..." 
+                           class="flex-1 border-3 border-black rounded-xl px-4 py-3 font-bold focus:outline-none focus:ring-4 focus:ring-[#FFDE59]">
+                    <button class="btn-neubrutalism bg-[#FF5757] text-white px-8 py-3 rounded-xl font-bold text-lg">
+                        上传 📤
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature Pills -->
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+            <span class="neubrutalism-card bg-[#FFDE59] px-6 py-3 rounded-full font-bold text-black">🎭 拟人化角色</span>
+            <span class="neubrutalism-card bg-[#39FF14] px-6 py-3 rounded-full font-bold text-black">💬 群聊对话</span>
+            <span class="neubrutalism-card bg-[#BF00FF] px-6 py-3 rounded-full font-bold text-white">🎨 生活化比喻</span>
+            <span class="neubrutalism-card bg-[#FF5757] px-6 py-3 rounded-full font-bold text-white">⚡ 实时解析</span>
+        </div>
+    </div>
+</body>
+</html>

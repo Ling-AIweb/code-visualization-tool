@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活化比喻 - AI 开发代理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --hot-pink: #FF71CE;
+            --sunny-yellow: #FFCE5C;
+            --teal-blue: #86CCCA;
+            --purple-blue: #6A7BB4;
+        }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+        }
+        
+        .font-display {
+            font-family: 'Varela Round', sans-serif;
+        }
+        
+        .memphis-card {
+            border: 3px solid #000;
+            box-shadow: 6px 6px 0 #000;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .memphis-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 10px 10px 0 #000;
+        }
+        
+        .geometric-shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        .squiggle-divider {
+            height: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'%3E%3Cpath d='M0,10 Q25,0 50,10 T100,10' fill='none' stroke='%23FF71CE' stroke-width='4'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+        }
+        
+        .triangle-shape {
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 52px solid #FFCE5C;
+        }
+        
+        .circle-shape {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #86CCCA;
+        }
+        
+        .wave-animation {
+            animation: wave 2s ease-in-out infinite;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+        
+        .metaphor-icon {
+            font-size: 4rem;
+            display: inline-block;
+            animation: bounce-slow 3s ease-in-out infinite;
+        }
+        
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pattern-bg {
+            background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.05) 1px, transparent 0);
+            background-size: 30px 30px;
+        }
+        
+        .rotate-hover:hover {
+            animation: spin 0.5s ease-out;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-[#FAF5FF] min-h-screen pattern-bg overflow-x-hidden">
+    <!-- Geometric Decorations -->
+    <div class="geometric-shape top-20 left-10">
+        <div class="triangle-shape"></div>
+    </div>
+    <div class="geometric-shape top-40 right-20" style="animation-delay: -2s;">
+        <div class="circle-shape"></div>
+    </div>
+    <div class="geometric-shape bottom-40 left-1/4" style="animation-delay: -4s;">
+        <div class="triangle-shape" style="border-bottom-color: #86CCCA;"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto p-6 relative">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-block memphis-card bg-[#FF71CE] px-6 py-2 rounded-full mb-4">
+                <span class="font-display font-bold text-white text-lg">✨ 像讲故事一样理解代码</span>
+            </div>
+            <h1 class="font-display text-5xl md:text-7xl font-bold text-gray-900 mb-4">
+                生活化<span class="text-[#FF71CE]">比喻</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-700 max-w-2xl mx-auto">
+                将代码逻辑转化为日常生活中的场景，让技术变得触手可及
+            </p>
+        </div>
+        
+        <div class="squiggle-divider mb-12"></div>
+        
+        <!-- Metaphor Cards Grid -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <!-- Card 1: Factory Metaphor -->
+            <div class="memphis-card bg-white p-8 rounded-3xl relative overflow-hidden">
+                <div class="absolute top-4 right-4 text-6xl rotate-hover cursor-pointer">🏭</div>
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-[#FFCE5C] flex items-center justify-center text-3xl">
+                        🏭
+                    </div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold text-gray-900">工厂流水线</h3>
+                        <p class="text-gray-600">函数调用</p>
+                    </div>
+                </div>
+                <div class="bg-[#FAF5FF] rounded-2xl p-6 mb-4">
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        就像工厂里的流水线一样，<span class="font-bold text-[#FF71CE]">函数</span>是一个专门处理特定任务的工位。原材料（参数）进入，经过加工，成品（返回值）输出。
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="bg-[#FF71CE] text-white px-4 py-2 rounded-full text-sm font-bold">输入 → 加工 → 输出</span>
+                </div>
+            </div>
+            
+            <!-- Card 2: Restaurant Metaphor -->
+            <div class="memphis-card bg-white p-8 rounded-3xl relative overflow-hidden">
+                <div class="absolute top-4 right-4 text-6xl rotate-hover cursor-pointer">🍽️</div>
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-[#86CCCA] flex items-center justify-center text-3xl">
+                        🍽️
+                    </div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold text-gray-900">餐厅点餐</h3>
+                        <p class="text-gray-600">API 请求</p>
+                    </div>
+                </div>
+                <div class="bg-[#FAF5FF] rounded-2xl p-6 mb-4">
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        就像在餐厅点餐，你向服务员发送<span class="font-bold text-[#86CCCA]">请求</span>，厨房准备后，服务员把<span class="font-bold text-[#86CCCA]">菜品</span>端上来。有时候厨房忙，需要排队等待。
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="bg-[#86CCCA] text-white px-4 py-2 rounded-full text-sm font-bold">请求 → 等待 → 响应</span>
+                </div>
+            </div>
+            
+            <!-- Card 3: Library Metaphor -->
+            <div class="memphis-card bg-white p-8 rounded-3xl relative overflow-hidden">
+                <div class="absolute top-4 right-4 text-6xl rotate-hover cursor-pointer">📚</div>
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-[#6A7BB4] flex items-center justify-center text-3xl">
+                        📚
+                    </div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold text-gray-900">图书馆</h3>
+                        <p class="text-gray-600">数据库查询</p>
+                    </div>
+                </div>
+                <div class="bg-[#FAF5FF] rounded-2xl p-6 mb-4">
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        就像在图书馆找书，你需要告诉图书管理员<span class="font-bold text-[#6A7BB4]">书名或分类</span>，他们帮你找到并借给你。每本书都有独特的编号。
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="bg-[#6A7BB4] text-white px-4 py-2 rounded-full text-sm font-bold">查询 → 检索 → 返回</span>
+                </div>
+            </div>
+            
+            <!-- Card 4: Traffic Light Metaphor -->
+            <div class="memphis-card bg-white p-8 rounded-3xl relative overflow-hidden">
+                <div class="absolute top-4 right-4 text-6xl rotate-hover cursor-pointer">🚦</div>
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-[#FF71CE] flex items-center justify-center text-3xl">
+                        🚦
+                    </div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold text-gray-900">交通信号灯</h3>
+                        <p class="text-gray-600">条件判断</p>
+                    </div>
+                </div>
+                <div class="bg-[#FAF5FF] rounded-2xl p-6 mb-4">
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        就像路口的信号灯，<span class="font-bold text-[#FF5757]">红灯停</span>、<span class="font-bold text-[#39FF14]">绿灯行</span>。程序根据不同的条件决定走哪条路，遵守规则才能安全到达目的地。
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="bg-[#FF71CE] text-white px-4 py-2 rounded-full text-sm font-bold">条件 → 判断 → 分支</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Demo Section -->
+        <div class="memphis-card bg-gradient-to-br from-[#FF71CE] to-[#6A7BB4] p-8 rounded-3xl text-white">
+            <div class="text-center mb-8">
+                <h2 class="font-display text-3xl font-bold mb-2">🎯 试试看！</h2>
+                <p class="text-lg opacity-90">上传代码，看看我们用什么比喻来解释</p>
+            </div>
+            
+            <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 mb-6">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="metaphor-icon">🎬</div>
+                    <div>
+                        <h3 class="font-display text-xl font-bold">比喻剧场</h3>
+                        <p class="text-sm opacity-80">选择一个场景开始体验</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button class="memphis-card bg-white text-gray-900 px-4 py-3 rounded-xl font-bold hover:bg-[#FFCE5C] transition-colors">
+                        🏭 工厂
+                    </button>
+                    <button class="memphis-card bg-white text-gray-900 px-4 py-3 rounded-xl font-bold hover:bg-[#86CCCA] transition-colors">
+                        🍽️ 餐厅
+                    </button>
+                    <button class="memphis-card bg-white text-gray-900 px-4 py-3 rounded-xl font-bold hover:bg-[#6A7BB4] transition-colors">
+                        📚 图书馆
+                    </button>
+                    <button class="memphis-card bg-white text-gray-900 px-4 py-3 rounded-xl font-bold hover:bg-[#FF71CE] transition-colors">
+                        🚦 信号灯
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button class="memphis-card bg-[#FFCE5C] text-gray-900 px-8 py-4 rounded-full font-bold text-xl hover:bg-white transition-colors">
+                    🚀 开始解释我的代码
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer Decorations -->
+        <div class="mt-12 flex justify-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-[#FF71CE] flex items-center justify-center text-2xl wave-animation">⭐</div>
+            <div class="w-12 h-12 rounded-full bg-[#FFCE5C] flex items-center justify-center text-2xl wave-animation" style="animation-delay: -0.5s;">🌙</div>
+            <div class="w-12 h-12 rounded-full bg-[#86CCCA] flex items-center justify-center text-2xl wave-animation" style="animation-delay: -1s;">💫</div>
+            <div class="w-12 h-12 rounded-full bg-[#6A7BB4] flex items-center justify-center text-2xl wave-animation" style="animation-delay: -1.5s;">✨</div>
+        </div>
+    </div>
+</body>
+</html>
