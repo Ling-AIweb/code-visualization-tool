@@ -6,69 +6,92 @@ import logging
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-from chromadb.utils import embedding_functions
-
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-
 class VectorService:
-    """向量数据库服务，负责代码片段的存储和语义检索"""
+    """向量数据库服务，负责代码片段的存储和语义检索（延迟初始化）"""
 
     def __init__(self) -> None:
-        """初始化 ChromaDB 客户端"""
-        self.persist_dir = Path(settings.CHROMA_PERSIST_DIR)
-        self.persist_dir.mkdir(parents=True, exist_ok=True)
-        
-        # 初始化 ChromaDB 客户端
-        self.client = chromadb.PersistentClient(
-            path=str(self.persist_dir),
-            settings=ChromaSettings(
-                anonymized_telemetry=False,
-                allow_reset=True
-            )
-        )
-        
-        # 使用 OpenAI 嵌入模型（需要 API Key）
-        # 如果没有配置 API Key，使用默认的 sentence-transformers
-        try:
-            self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=settings.API_KEY,
-                api_base=settings.API_BASE,
-                model_name="text-embedding-ada-002"
-            )
-            logger.info("使用 OpenAI 嵌入模型")
-        except Exception:
-            # 降级使用默认嵌入函数
-            self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
-            logger.warning("OpenAI 嵌入模型不可用，使用默认嵌入函数")
-        
-        # 集合名称
+        """仅保存配置，不立即初始化 ChromaDB（延迟到首次使用时）"""
         self.collection_name = "code_fragments"
-        self.collection = None
-        
-        # 初始化集合
-        self._initialize_collection()
+        self._client = None
+        self._collection = None
+        self._embedding_function = None
+        self._initialized = False
+
+    def _ensure_initialized(self) -> bool:
+        """延迟初始化：首次调用时才创建 ChromaDB 客户端和集合"""
+        if self._initialized:
+            return self._collection is not None
+
+        self._initialized = True
+
+        try:
+            import chromadb
+            from chromadb.config import Settings as ChromaSettings
+            from chromadb.utils import embedding_functions
+
+            persist_dir = Path(settings.CHROMA_PERSIST_DIR)
+            persist_dir.mkdir(parents=True, exist_ok=True)
+
+            self._client = chromadb.PersistentClient(
+                path=str(persist_dir),
+                settings=ChromaSettings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
+
+            # 使用 OpenAI 嵌入模型；如果 API Key 为空则降级
+            if settings.API_KEY:
+                try:
+                    self._embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+                        api_key=settings.API_KEY,
+                        api_base=settings.API_BASE,
+                        model_name="text-embedding-ada-002"
+                    )
+                    logger.info("使用 OpenAI 嵌入模型")
+                except Exception:
+                    self._embedding_function = embedding_functions.DefaultEmbeddingFunction()
+                    logger.warning("OpenAI 嵌入模型不可用，降级使用默认嵌入函数")
+            else:
+                self._embedding_function = embedding_functions.DefaultEmbeddingFunction()
+                logger.info("未配置 API Key，使用默认嵌入函数")
+
+            self._initialize_collection()
+            return self._collection is not None
+
+        except Exception as error:
+            logger.error("ChromaDB 初始化失败: %s", str(error))
+            return False
+
+    @property
+    def client(self):
+        self._ensure_initialized()
+        return self._client
+
+    @property
+    def collection(self):
+        self._ensure_initialized()
+        return self._collection
 
     def _initialize_collection(self) -> None:
         """初始化或获取 ChromaDB 集合"""
         try:
-            # 检查集合是否存在
-            existing_collections = [col.name for col in self.client.list_collections()]
-            
+            existing_collections = [col.name for col in self._client.list_collections()]
+
             if self.collection_name in existing_collections:
-                self.collection = self.client.get_collection(
+                self._collection = self._client.get_collection(
                     name=self.collection_name,
-                    embedding_function=self.embedding_function
+                    embedding_function=self._embedding_function
                 )
                 logger.info("获取已存在的集合: %s", self.collection_name)
             else:
-                self.collection = self.client.create_collection(
+                self._collection = self._client.create_collection(
                     name=self.collection_name,
-                    embedding_function=self.embedding_function,
+                    embedding_function=self._embedding_function,
                     metadata={"description": "代码片段向量存储"}
                 )
                 logger.info("创建新集合: %s", self.collection_name)
@@ -275,7 +298,7 @@ class VectorService:
             return {
                 "collection_name": self.collection_name,
                 "total_fragments": count,
-                "persist_directory": str(self.persist_dir)
+                "persist_directory": settings.CHROMA_PERSIST_DIR
             }
         except Exception as error:
             logger.error("获取统计信息失败: %s", str(error))
@@ -290,9 +313,10 @@ class VectorService:
         """
         if not self.collection:
             return False
-        
+
         try:
-            self.client.delete_collection(name=self.collection_name)
+            self._client.delete_collection(name=self.collection_name)
+            self._collection = None
             self._initialize_collection()
             logger.info("集合 %s 已重置", self.collection_name)
             return True
