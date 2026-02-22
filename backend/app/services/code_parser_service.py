@@ -14,6 +14,7 @@ from app.utils.chunker import (
 )
 from app.utils.sanitizer import sanitize_file_content
 from app.services.llm_service import llm_service, LLMError
+from app.services.vector_service import vector_service
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ class CodeParserService:
 
     def __init__(self) -> None:
         self.max_files_to_summarize = 20  # 最多处理 20 个核心文件以控制成本
+        self.enable_vector_storage = True  # 是否启用向量数据库存储
 
     async def parse_project(
         self, project_dir: str
@@ -66,6 +68,11 @@ class CodeParserService:
             "summarized_files": len(files_with_summaries),
             "file_summaries": files_with_summaries,
         }
+
+        # Step 5: 将代码片段存储到向量数据库（如果启用）
+        if self.enable_vector_storage:
+            logger.info("Step 5: 存储代码片段到向量数据库...")
+            await self._store_to_vector_database(sanitized_files)
 
         logger.info("项目解析完成")
         return result
@@ -314,6 +321,52 @@ class CodeParserService:
         return descriptions.get(
             extension, f"这是 {file_name}，项目的核心代码文件"
         )
+
+    async def _store_to_vector_database(
+        self, file_summaries: List[Dict[str, Any]]
+    ) -> None:
+        """
+        将代码片段存储到向量数据库
+
+        Args:
+            file_summaries: 文件摘要列表
+        """
+        fragments = []
+
+        for file_info in file_summaries:
+            file_path = file_info.get("file_path", "")
+            extension = file_info.get("extension", "")
+            sanitized_preview = file_info.get("sanitized_preview", "")
+
+            if not sanitized_preview:
+                continue
+
+            # 为每个文件创建唯一的片段 ID
+            fragment_id = file_path.replace("/", "_").replace("\\", "_")
+
+            # 提取元数据
+            metadata = {
+                "file_name": file_info.get("file_name", ""),
+                "language": extension.lstrip("."),
+                "classes": file_info.get("classes", []),
+                "functions": file_info.get("functions", []),
+                "methods": file_info.get("methods", []),
+            }
+
+            fragments.append({
+                "id": fragment_id,
+                "content": sanitized_preview,
+                "file_path": file_path,
+                "language": extension.lstrip("."),
+                "metadata": metadata
+            })
+
+        if fragments:
+            try:
+                added_count = await vector_service.add_code_fragments(fragments)
+                logger.info("成功存储 %d 个代码片段到向量数据库", added_count)
+            except Exception as error:
+                logger.warning("存储到向量数据库失败: %s", str(error))
 
     def save_to_json(self, data: Dict[str, Any], output_path: str) -> None:
         """

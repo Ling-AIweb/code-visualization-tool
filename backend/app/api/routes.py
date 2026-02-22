@@ -6,6 +6,7 @@ from app.services.project_service import project_service
 from app.services.script_service import script_service
 from app.services.explain_service import explain_service
 from app.services.architecture_service import architecture_service
+from app.services.vector_service import vector_service
 from app.services.llm_service import LLMError
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,22 @@ class ProjectDetailsResponse(BaseModel):
     termDictionary: list | None = None
     status: str
     progress: int
+
+class SearchCodeRequest(BaseModel):
+    query: str
+    n_results: int = 5
+    language: str | None = None
+
+class SearchResult(BaseModel):
+    id: str
+    content: str
+    metadata: dict
+    similarity: float | None = None
+
+class SearchResponse(BaseModel):
+    query: str
+    results: list[SearchResult]
+    total: int
 
 
 @api_router.post("/upload", response_model=UploadResponse)
@@ -241,3 +258,45 @@ async def get_project_details(task_id: str):
         logger.warning("架构可视化数据获取失败: %s", str(error))
 
     return ProjectDetailsResponse(**response_data)
+
+@api_router.post("/search/code", response_model=SearchResponse)
+async def search_code(request: SearchCodeRequest):
+    """
+    语义搜索代码片段
+    """
+    # 构建过滤条件
+    filters = {}
+    if request.language:
+        filters["language"] = request.language
+    
+    # 调用向量服务进行语义搜索
+    results = await vector_service.search_similar_code(
+        query=request.query,
+        n_results=request.n_results,
+        filters=filters if filters else None
+    )
+    
+    # 格式化结果
+    formatted_results = [
+        SearchResult(
+            id=result["id"],
+            content=result["content"],
+            metadata=result["metadata"],
+            similarity=result.get("similarity")
+        )
+        for result in results
+    ]
+    
+    return SearchResponse(
+        query=request.query,
+        results=formatted_results,
+        total=len(formatted_results)
+    )
+
+@api_router.get("/database/stats")
+async def get_database_stats():
+    """
+    获取向量数据库统计信息
+    """
+    stats = await vector_service.get_collection_stats()
+    return stats
