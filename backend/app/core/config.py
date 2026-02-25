@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     # CORS 配置（逗号分隔的来源列表）
-    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3003,http://localhost:5173,https://code-visualization-tool.vercel.app"
 
     # 文件上传配置
     MAX_UPLOAD_SIZE_MB: int = 500
