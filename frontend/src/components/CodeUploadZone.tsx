@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { FileArchive, Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react'
 import axios from 'axios'
+import Toast from './Toast'
 
 interface UploadResult {
   taskId: string
@@ -18,6 +19,7 @@ interface CodeUploadZoneProps {
 export default function CodeUploadZone({ onUploadComplete }: CodeUploadZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false)
   const [currentUpload, setCurrentUpload] = useState<UploadResult | null>(null)
+  const [toast, setToast] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -60,6 +62,7 @@ export default function CodeUploadZone({ onUploadComplete }: CodeUploadZoneProps
         progress: 0,
         message: '请上传 ZIP 格式的代码压缩包',
       })
+      setToast({ type: 'error', message: '请上传 ZIP 格式的代码压缩包' })
       return
     }
 
@@ -73,6 +76,7 @@ export default function CodeUploadZone({ onUploadComplete }: CodeUploadZoneProps
         progress: 0,
         message: `文件大小超过 ${maxSizeMB}MB 限制`,
       })
+      setToast({ type: 'error', message: `文件大小超过 ${maxSizeMB}MB 限制` })
       return
     }
 
@@ -112,6 +116,7 @@ export default function CodeUploadZone({ onUploadComplete }: CodeUploadZoneProps
         progress: 0,
         message: error.response?.data?.detail || '上传失败，请检查网络后重试',
       }))
+      setToast({ type: 'error', message: error.response?.data?.detail || '上传失败，请检查网络后重试' })
     }
   }
 
@@ -151,6 +156,7 @@ export default function CodeUploadZone({ onUploadComplete }: CodeUploadZoneProps
             progress: 0,
             message: message || '解析失败，请重试',
           }))
+          setToast({ type: 'error', message: message || '解析失败，请重试' })
         } else {
           setCurrentUpload((previous) => ({
             ...previous!,
@@ -167,6 +173,7 @@ export default function CodeUploadZone({ onUploadComplete }: CodeUploadZoneProps
           status: 'failed',
           message: '网络连接中断，请重试',
         }))
+        setToast({ type: 'error', message: '网络连接中断，请重试' })
       }
     }, 2000)
   }
@@ -183,6 +190,15 @@ export default function CodeUploadZone({ onUploadComplete }: CodeUploadZoneProps
 
   return (
     <div className="w-full">
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       {/* Upload Drop Zone */}
       <div
         onDragOver={handleDragOver}

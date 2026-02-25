@@ -2,12 +2,14 @@ import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { uploadCode } from '../services/api'
 import HistoryModal from '../components/HistoryModal'
+import Toast from '../components/Toast'
 
 export default function HomePage() {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
+  const [toast, setToast] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>(null)
   const navigate = useNavigate()
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +45,7 @@ export default function HomePage() {
       navigate(`/project/${result.task_id}`)
     } catch (error: any) {
       console.error('上传失败:', error)
-      alert(error.message || '上传失败，请重试')
+      setToast({ type: 'error', message: error.message || '上传失败，请重试' })
     } finally {
       setUploading(false)
     }
@@ -51,6 +53,15 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -66,12 +77,9 @@ export default function HomePage() {
             <a href="#about" className="text-sm hover:text-gray-300 transition-colors">关于</a>
             <button
               onClick={() => setHistoryModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+              className="text-sm hover:text-gray-300 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-sm">历史记录</span>
+              历史记录
             </button>
           </div>
         </div>
