@@ -72,6 +72,40 @@ class SearchResponse(BaseModel):
     results: list[SearchResult]
     total: int
 
+class HistoryItemResponse(BaseModel):
+    task_id: str
+    file_name: str
+    created_at: str
+    status: str
+    file_count: int | None = None
+
+class HistoryListResponse(BaseModel):
+    items: list[HistoryItemResponse]
+
+@api_router.get("/history/list", response_model=HistoryListResponse)
+async def get_history_list():
+    """
+    获取历史记录列表
+    """
+    # 调用服务层获取历史记录
+    history_data = project_service.get_history_list()
+    
+    # 将时间戳转换为 ISO 格式字符串
+    items = []
+    for item in history_data:
+        from datetime import datetime
+        created_at_str = datetime.fromtimestamp(item["created_at"]).isoformat()
+        
+        items.append(HistoryItemResponse(
+            task_id=item["task_id"],
+            file_name=item["file_name"],
+            created_at=created_at_str,
+            status=item["status"],
+            file_count=item.get("file_count")
+        ))
+    
+    return HistoryListResponse(items=items)
+
 
 @api_router.post("/upload", response_model=UploadResponse)
 async def upload_project(file: UploadFile = File(...)):

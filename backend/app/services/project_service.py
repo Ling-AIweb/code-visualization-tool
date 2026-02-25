@@ -507,5 +507,27 @@ class ProjectService:
             return []
         return task.get("file_summaries", [])
 
+    def get_history_list(self) -> List[Dict[str, Any]]:
+        """获取历史记录列表"""
+        history_list = []
+        
+        for task_id, task_data in self.tasks.items():
+            file_list = task_data.get("file_list", [])
+            file_name = file_list[0] if file_list else "未知项目"
+            
+            history_item = {
+                "task_id": task_id,
+                "file_name": file_name,
+                "created_at": task_data.get("created_at", 0),
+                "status": task_data.get("status", "unknown"),
+                "file_count": len(file_list)
+            }
+            history_list.append(history_item)
+        
+        # 按创建时间倒序排列（最新的在前）
+        history_list.sort(key=lambda x: x["created_at"], reverse=True)
+        
+        return history_list
+
 
 project_service = ProjectService()
