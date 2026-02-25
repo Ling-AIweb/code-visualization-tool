@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Clock, FileText, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
-import { getHistoryList, type HistoryItem } from '../services/api'
+import { getHistoryList } from '../services/api'
+import type { HistoryItem } from '../types'
 
 interface HistoryModalProps {
   isOpen: boolean
