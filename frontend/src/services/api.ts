@@ -4,7 +4,8 @@ import type {
   TaskStatusResponse,
   GenerateScriptRequest,
   GenerateScriptResponse,
-  ProjectDetails
+  ProjectDetails,
+  HistoryItem
 } from '../types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
@@ -178,6 +179,12 @@ export const explainTerm = async (term: string, codeSnippet?: string): Promise<a
 // 获取项目结构
 export const getProjectStructure = async (taskId: string): Promise<any> => {
   const response = await apiClient.get(`/project/structure?task_id=${taskId}`)
+  return response.data
+}
+
+// 获取历史记录列表
+export const getHistoryList = async (): Promise<HistoryItem[]> => {
+  const response = await apiClient.get<HistoryItem[]>('/history/list')
   return response.data
 }
 

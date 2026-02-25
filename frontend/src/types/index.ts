@@ -110,3 +110,12 @@ export interface GenerateScriptResponse {
   characters: Character[]
   dialogues: DialogueMessage[]
 }
+
+// 历史记录项类型
+export interface HistoryItem {
+  task_id: string
+  file_name: string
+  created_at: string
+  status: 'processing' | 'completed' | 'failed'
+  file_count?: number
+}

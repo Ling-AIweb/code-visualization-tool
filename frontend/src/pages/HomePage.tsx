@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { uploadCode } from '../services/api'
+import HistoryModal from '../components/HistoryModal'
 
 export default function HomePage() {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const navigate = useNavigate()
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +64,15 @@ export default function HomePage() {
             <a href="#features" className="text-sm hover:text-gray-300 transition-colors">功能</a>
             <a href="#upload" className="text-sm hover:text-gray-300 transition-colors">开始</a>
             <a href="#about" className="text-sm hover:text-gray-300 transition-colors">关于</a>
+            <button
+              onClick={() => setHistoryModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm">历史记录</span>
+            </button>
           </div>
         </div>
       </nav>
@@ -280,6 +291,12 @@ export default function HomePage() {
           <p className="opacity-60 text-sm">© 2026 AI Code Understanding. 让每个人都能看懂代码。</p>
         </div>
       </footer>
+      
+      {/* History Modal */}
+      <HistoryModal
+        isOpen={historyModalOpen}
+        onClose={() => setHistoryModalOpen(false)}
+      />
     </div>
   )
 }
