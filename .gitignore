@@ -52,6 +52,7 @@ wheels/
 .env
 .env.local
 .env.*.local
+.env.production
 
 # Uploads and data
 backend/uploads/*

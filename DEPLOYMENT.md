@@ -54,9 +54,9 @@ git push origin main
    
    | 变量名 | 值 | 说明 |
    |--------|-----|------|
-   | `API_KEY` | `sk-5Ke79wdn8pr7iRlXskZPudyXPgXrUN638lx2snPhTIqqUKc1` | API 密钥 |
-   | `API_BASE` | `https://new.lemonapi.site/v1` | API 基础地址 |
-   | `MODEL_NAME` | `gemini-2.5-pro` | 模型名称 |
+   | `API_KEY` | `your-api-key-here` | API 密钥（从 Render 控制台设置） |
+   | `API_BASE` | `your-api-base-here` | API 基础地址 |
+   | `MODEL_NAME` | `your-model-name` | 模型名称 |
    | `PORT` | `8000` | 端口号 |
 
 5. **部署**
