@@ -7,8 +7,8 @@ import json
 
 async def test_model(model_name):
     """测试单个模型"""
-    api_key = "sk-29370fabd56a5f6302bdc6df707775ac"
-    api_base = "https://apis.iflow.cn/v1"
+    api_key = "sk-sp-1a49b02548a34b948ec5fd4dddb69266"
+    api_base = "https://coding.dashscope.aliyuncs.com/v1"
     
     url = f"{api_base}/chat/completions"
     headers = {

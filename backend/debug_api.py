@@ -7,9 +7,9 @@ import json
 
 async def debug_api():
     """直接调用 API 查看原始响应"""
-    api_key = "sk-29370fabd56a5f6302bdc6df707775ac"
-    api_base = "https://apis.iflow.cn/v1"
-    model = "gpt-4"
+    api_key = "sk-sp-1a49b02548a34b948ec5fd4dddb69266"
+    api_base = "https://coding.dashscope.aliyuncs.com/v1"
+    model = "qwen3.5-plus"
     
     url = f"{api_base}/chat/completions"
     headers = {

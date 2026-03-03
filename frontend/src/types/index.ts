@@ -44,6 +44,9 @@ export interface TermExplanation {
   term: string
   laymanExplanation: string
   technicalExplanation: string
+  analogy: string
+  relatedFiles: string[]
+  relatedComponent: string
   examples: string[]
 }
 

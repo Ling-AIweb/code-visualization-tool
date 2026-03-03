@@ -30,19 +30,25 @@ export default function ProjectDetailsPage() {
 
   // 当任务处于 processing 状态时，自动轮询直到完成
   useEffect(() => {
-    if (!projectDetails || projectDetails.status !== 'processing') return
+    if (!projectDetails) return
+    
+    // 只有在 processing 状态时才轮询
+    if (projectDetails.status !== 'processing') return
 
     const pollingInterval = setInterval(async () => {
       try {
         const details = await getProjectDetails(taskId!)
         setProjectDetails(details)
-        if (details.status !== 'processing') {
+        
+        // 当状态变为 completed 或 failed 时停止轮询
+        if (details.status === 'completed' || details.status === 'failed') {
           clearInterval(pollingInterval)
         }
-      } catch {
+      } catch (err) {
+        console.error('轮询失败:', err)
         clearInterval(pollingInterval)
       }
-    }, 3000)
+    }, 1500)
 
     return () => clearInterval(pollingInterval)
   }, [projectDetails?.status, taskId])
@@ -209,25 +215,76 @@ export default function ProjectDetailsPage() {
 
           {/* Tab 内容 */}
           <div className="animate-fade-in">
-            {activeTab === 'structure' && projectDetails.structure && (
-              <ProjectStructureTree
-                structure={projectDetails.structure}
-                onNodeClick={(node) => {
-                  console.log('Clicked node:', node)
-                }}
-              />
+            {activeTab === 'structure' && (
+              projectDetails.structure ? (
+                <ProjectStructureTree
+                  structure={projectDetails.structure}
+                  onNodeClick={(node) => {
+                    console.log('Clicked node:', node)
+                  }}
+                />
+              ) : (
+                <div className="text-center py-16 opacity-60">
+                  <p>项目结构数据加载中...</p>
+                  <button
+                    onClick={fetchProjectDetails}
+                    className="mt-4 btn-primary px-6 py-2"
+                  >
+                    刷新数据
+                  </button>
+                </div>
+              )
             )}
 
-            {activeTab === 'architecture' && projectDetails.architecture && (
-              <ArchitectureMap graph={projectDetails.architecture} />
+            {activeTab === 'architecture' && (
+              projectDetails.architecture ? (
+                <ArchitectureMap graph={projectDetails.architecture} />
+              ) : (
+                <div className="text-center py-16 opacity-60">
+                  <p>架构图数据加载中...</p>
+                  <p className="text-sm mt-2">AI 正在分析代码结构，请稍候</p>
+                  <button
+                    onClick={fetchProjectDetails}
+                    className="mt-4 btn-primary px-6 py-2"
+                  >
+                    刷新数据
+                  </button>
+                </div>
+              )
             )}
 
-            {activeTab === 'chat' && projectDetails.chatScript && (
-              <ChatScript script={projectDetails.chatScript} />
+            {activeTab === 'chat' && (
+              projectDetails.chatScript ? (
+                <ChatScript script={projectDetails.chatScript} />
+              ) : (
+                <div className="text-center py-16 opacity-60">
+                  <p>群聊剧本数据加载中...</p>
+                  <p className="text-sm mt-2">AI 正在生成拟人化对话，请稍候</p>
+                  <button
+                    onClick={fetchProjectDetails}
+                    className="mt-4 btn-primary px-6 py-2"
+                  >
+                    刷新数据
+                  </button>
+                </div>
+              )
             )}
 
-            {activeTab === 'dictionary' && projectDetails.termDictionary && (
-              <TermDictionary terms={projectDetails.termDictionary} />
+            {activeTab === 'dictionary' && (
+              projectDetails.termDictionary ? (
+                <TermDictionary terms={projectDetails.termDictionary} />
+              ) : (
+                <div className="text-center py-16 opacity-60">
+                  <p>术语词典数据加载中...</p>
+                  <p className="text-sm mt-2">AI 正在整理技术术语，请稍候</p>
+                  <button
+                    onClick={fetchProjectDetails}
+                    className="mt-4 btn-primary px-6 py-2"
+                  >
+                    刷新数据
+                  </button>
+                </div>
+              )
             )}
           </div>
 

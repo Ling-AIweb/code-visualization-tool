@@ -12,7 +12,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  timeout: 180000, // 3 分钟超时，架构可视化需要多次 LLM 调用
   headers: {
     'Content-Type': 'application/json',
   },
@@ -113,6 +113,9 @@ export const getProjectDetails = async (taskId: string): Promise<ProjectDetails>
   }
 
   // 填充架构可视化数据（分层 + 群聊剧本 + 术语词典）
+  if (architectureResult.status === 'rejected') {
+    console.error('架构可视化数据获取失败:', architectureResult.reason?.message || architectureResult.reason)
+  }
   if (architectureResult.status === 'fulfilled') {
     const visualizationData = architectureResult.value.data
 
@@ -150,6 +153,9 @@ export const getProjectDetails = async (taskId: string): Promise<ProjectDetails>
         term: term.term || '',
         laymanExplanation: term.plainExplanation || '',
         technicalExplanation: term.description || '',
+        analogy: term.analogy || '',
+        relatedFiles: term.relatedFiles || [],
+        relatedComponent: term.relatedComponent || '',
         examples: term.examples || [],
       }))
     }

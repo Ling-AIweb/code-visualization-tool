@@ -3,6 +3,7 @@
 生成面向外行人的架构分层、服务聊天剧本和技术名词解释。
 遵循 AGENTS.md 的生活化比喻原则。
 """
+import json
 import logging
 from typing import Dict, Any, List, Optional
 
@@ -51,6 +52,8 @@ class ArchitectureService:
         Returns:
             包含 layers, scenarios, techTerms 的字典
         """
+        logger.info("开始生成架构可视化: task_id=%s", task_id)
+        
         # 优先返回缓存
         cached = self.get_cached_visualization(task_id)
         if cached is not None:
@@ -62,12 +65,47 @@ class ArchitectureService:
         file_summaries = project_service.get_file_summaries(task_id)
 
         if not project_data:
+            logger.error("项目数据未找到: task_id=%s", task_id)
             raise ValueError("项目未找到或未完成解析")
 
+        logger.info("获取到文件摘要数量: %d", len(file_summaries))
+        
+        # 检查 file_summaries 是否为空
+        if not file_summaries:
+            logger.error("文件摘要为空，无法生成架构可视化数据")
+            raise ValueError("文件摘要为空，请确保项目解析已完成")
+
+        # 打印第一个文件摘要的详细信息用于调试
+        if file_summaries:
+            logger.debug("第一个文件摘要: %s", json.dumps(file_summaries[0], ensure_ascii=False))
+
         # 并行生成三个部分的数据
-        layers_result = await self._generate_layers(file_summaries)
-        scenarios_result = await self._generate_scenarios(file_summaries)
-        terms_result = await self._generate_tech_terms(file_summaries)
+        try:
+            logger.info("开始生成架构分层...")
+            layers_result = await self._generate_layers(file_summaries)
+            logger.info("架构分层生成完成，层数: %d", len(layers_result))
+        except Exception as e:
+            logger.error("架构分层生成失败: %s", str(e), exc_info=True)
+            layers_result = self._generate_default_layers()
+            logger.warning("使用默认架构分层")
+
+        try:
+            logger.info("开始生成场景剧本...")
+            scenarios_result = await self._generate_scenarios(file_summaries)
+            logger.info("场景剧本生成完成，场景数: %d", len(scenarios_result))
+        except Exception as e:
+            logger.error("场景剧本生成失败: %s", str(e), exc_info=True)
+            scenarios_result = self._generate_default_scenarios()
+            logger.warning("使用默认场景剧本")
+
+        try:
+            logger.info("开始生成术语词典...")
+            terms_result = await self._generate_tech_terms(file_summaries)
+            logger.info("术语词典生成完成，术语数: %d", len(terms_result))
+        except Exception as e:
+            logger.error("术语词典生成失败: %s", str(e), exc_info=True)
+            terms_result = self._generate_default_terms()
+            logger.warning("使用默认术语词典")
 
         result = {
             "layers": layers_result,
@@ -77,7 +115,9 @@ class ArchitectureService:
 
         # 写入缓存
         self._cache[task_id] = result
-        logger.info("已缓存可视化结果: task_id=%s", task_id)
+        logger.info("架构可视化生成完成并已缓存: task_id=%s", task_id)
+        logger.info("结果摘要: layers=%d, scenarios=%d, techTerms=%d", 
+                   len(layers_result), len(scenarios_result), len(terms_result))
 
         return result
 
@@ -94,45 +134,78 @@ class ArchitectureService:
             层级列表
         """
         system_prompt = (
-            "你是一个架构师，擅长用大白话解释软件架构。\n"
-            "你的任务是把项目的代码结构，翻译成外行人也能懂的分层架构。\n\n"
-            "规则：\n"
-            "1. 按照典型的三层架构（前端展示层、业务逻辑层、数据存储层）来分层\n"
-            "2. 如果项目比较复杂，可以细分到 4-5 层\n"
-            "3. 每层要有：\n"
-            "   - name: 层级名称（如「前端展示层」）\n"
-            "   - description: 一句话技术描述\n"
-            "   - plainExplanation: 用大白话解释这层是干嘛的（像跟朋友聊天一样）\n"
-            "   - components: 这层包含的主要组件列表\n"
-            "4. 组件要有：\n"
-            "   - name: 组件名称\n"
-            "   - role: 技术角色（如 Controller、Service、Database）\n"
-            "   - description: 技术描述\n"
-            "   - plainExplanation: 用大白话解释这个组件是干嘛的\n"
-            "   - files: 该组件对应的代码文件路径列表（从项目根目录开始的相对路径）\n"
-            "5. 禁止使用技术黑话，必须用生活化类比\n"
-            "6. 返回 JSON 格式的 layers 数组\n\n"
-            "返回格式示例：\n"
+            "# 角色\n"
+            "你是一位「代码翻译官」，专门将复杂的技术架构翻译成产品经理、运营人员也能听懂的「大白话」。\n"
+            "你的目标读者是：完全没有技术背景的小白 PM/运营、初学者。\n\n"
+            "# 任务\n"
+            "分析项目的代码结构，生成 3-5 个架构分层，每个分层用生活化的场景来比喻。\n\n"
+            "# 核心规则（必须严格遵守）\n\n"
+            "1. **生活化类比**：\n"
+            "   - 前端展示层 → 餐厅大堂/店铺橱窗\n"
+            "   - 接口控制器 → 服务员/传声筒\n"
+            "   - 业务逻辑层 → 厨房/加工车间\n"
+            "   - 数据库 → 档案室/仓库\n"
+            "   - 缓存 → 备忘录/常用物品\n"
+            "   - 消息队列 → 待办事项/传单\n\n"
+            "2. **禁止技术黑话**（绝对不能出现的词）：\n"
+            "   - ❌ MVC、RESTful、ORM、IoC、DI、AOP\n"
+            "   - ❌ 中间件、拦截器、适配器、装饰器\n"
+            "   - ❌ 异步、同步、并发、多线程\n"
+            "   - ❌ 事务、锁、索引、主键\n"
+            "   - ✅ 可以用：接收请求、处理订单、存档案、排队等待\n\n"
+            "3. **分层数量**：\n"
+            "   - 简单项目：3 层（前端、后端、数据库）\n"
+            "   - 复杂项目：4-5 层（增加网关、缓存、消息队列等）\n\n"
+            "4. **组件映射**：\n"
+            "   - Controller/Router → 服务员/接待员\n"
+            "   - Service → 厨师/加工员\n"
+            "   - Repository/DAO → 档案管理员\n"
+            "   - Database → 档案室\n"
+            "   - Cache → 备忘本\n"
+            "   - Queue → 待办清单\n\n"
+            "# 输出格式\n\n"
+            "返回 JSON 数组，每个元素包含：\n"
+            "- id: 唯一标识（layer-0, layer-1...）\n"
+            "- name: 层级名称（如「前端展示层」）\n"
+            "- description: 一句话技术描述（给开发看）\n"
+            "- plainExplanation: 大白话解释（给小白看，必须用生活化比喻）\n"
+            "- components: 组件列表（每个组件包含 name/role/description/plainExplanation/files）\n\n"
+            "# Few-Shot 示例\n\n"
+            "## 示例 1：电商系统\n"
+            "```json\n"
             "[\n"
             "  {\n"
             '    "id": "layer-0",\n'
             '    "name": "前端展示层",\n'
-            '    "description": "用户界面和交互逻辑",\n'
-            '    "plainExplanation": "这一层就像餐厅的大堂，负责接待客人、展示菜单、接收点单。用户直接接触的就是这一层。",\n'
-            '    "color": "from-blue-400 to-blue-600",\n'
-            '    "bgColor": "bg-blue-50",\n'
-            '    "borderColor": "border-blue-200",\n'
+            '    "description": "React/Vue 用户界面",\n'
+            '    "plainExplanation": "就像电商平台的店铺橱窗，负责展示商品图片、价格，接收顾客的点击和下单操作。",\n'
             '    "components": [\n'
             "      {\n"
-            '        "name": "前端界面",\n'
+            '        "name": "商品页面",\n'
             '        "role": "Frontend",\n'
-            '        "description": "用户界面组件",\n'
-            '        "plainExplanation": "就像餐厅的装修和菜单，负责把内容展示给用户看。",\n'
-            '        "files": ["frontend/src/pages/HomePage.tsx", "frontend/src/components/Header.tsx"]\n'
+            '        "description": "商品详情页组件",\n'
+            '        "plainExplanation": "就像商品卡片，展示商品照片、价格、评论，让顾客决定买不买。",\n'
+            '        "files": ["frontend/src/pages/Product.tsx"]\n'
+            "      }\n"
+            "    ]\n"
+            "  },\n"
+            "  {\n"
+            '    "id": "layer-1",\n'
+            '    "name": "业务逻辑层",\n'
+            '    "description": "订单处理服务",\n'
+            '    "plainExplanation": "就像厨房，收到顾客点单后，负责检查库存、计算价格、安排发货。",\n'
+            '    "components": [\n'
+            "      {\n"
+            '        "name": "订单服务",\n'
+            '        "role": "Service",\n'
+            '        "description": "订单创建和状态管理",\n'
+            '        "plainExplanation": "就像厨房的厨师长，负责核对订单、安排做菜、打包外卖。",\n'
+            '        "files": ["backend/app/services/order_service.py"]\n'
             "      }\n"
             "    ]\n"
             "  }\n"
-            "]"
+            "]\n"
+            "```"
         )
 
         # 构建项目上下文
@@ -144,26 +217,31 @@ class ArchitectureService:
         )
 
         try:
+            logger.info("调用 LLM 生成架构分层，文件数: %d", len(file_summaries))
             result = await llm_service.generate_json(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 temperature=0.7,
                 max_tokens=8000,
             )
+            logger.info("LLM 返回结果类型: %s", type(result))
 
             # 确保返回的是列表
             if isinstance(result, dict) and "layers" in result:
                 layers = result["layers"]
+                logger.info("从字典中提取 layers，数量: %d", len(layers))
             elif isinstance(result, list):
                 layers = result
+                logger.info("直接使用列表，数量: %d", len(layers))
             else:
+                logger.warning("LLM 返回格式异常，使用默认分层")
                 layers = []
 
             # 为每层添加必需的样式字段
             return self._enrich_layers_with_styles(layers)
 
         except LLMError as error:
-            logger.warning("LLM 分层生成失败，使用默认模板: %s", str(error))
+            logger.error("LLM 分层生成失败，使用默认模板: %s", str(error), exc_info=True)
             return self._generate_default_layers()
 
     async def _generate_scenarios(
@@ -179,39 +257,50 @@ class ArchitectureService:
             场景列表
         """
         system_prompt = (
-            "你是一个编剧，擅长把代码交互写成有趣的群聊对话。\n"
-            "你的任务是基于项目的代码结构，生成 3-5 个核心业务场景的群聊剧本。\n\n"
-            "规则：\n"
-            "1. 识别项目的核心功能场景（如用户登录、下单、搜索等）\n"
-            "2. 第一个场景必须是最核心的功能\n"
-            "3. 每个场景包含：\n"
-            "   - id: 场景唯一标识\n"
-            "   - title: 场景名称（如「用户付款」）\n"
-            "   - description: 一句话描述这个场景\n"
-            "   - characters: 参与的角色列表\n"
-            "   - messages: 对话消息列表\n"
-            "4. 角色包含：\n"
-            "   - id: 唯一标识\n"
-            "   - name: 角色昵称（如「前端小美」）\n"
-            "   - role: 技术角色（如 Frontend）\n"
-            "   - personality: 性格描述\n"
-            "   - color: 颜色样式（如 bg-blue-100 text-blue-700 border-blue-300）\n"
-            "5. 消息包含：\n"
-            "   - id: 消息唯一标识\n"
-            "   - from: 发送者角色 ID\n"
-            "   - to: 接收者角色 ID\n"
-            "   - content: 消息内容（口语化，像同事在群里传话）\n"
-            "   - codeRef: 对应的代码位置（如 routes.py:45）\n"
-            "6. 对话要反映真实的代码调用流程\n"
-            "7. 语言要口语化、有趣，像朋友聊天\n"
-            "8. 禁止使用技术黑话\n"
-            "9. 返回 JSON 格式的 scenarios 数组\n\n"
-            "返回格式示例：\n"
+            "# 角色\n"
+            "你是一位「代码编剧」，擅长将枯燥的代码调用流程，写成生动有趣的群聊对话剧本。\n"
+            "你的目标是：让小白 PM/运营通过看对话，就能理解代码是怎么跑起来的。\n\n"
+            "# 任务\n"
+            "分析项目的代码结构，识别 3-5 个核心业务场景，为每个场景生成群聊剧本。\n\n"
+            "# 角色设定（必须使用）\n\n"
+            "## 标准角色库\n"
+            "- **前端小美**（Frontend）：活泼开朗，负责展示界面，说话带表情符号\n"
+            "- **服务员阿强**（Controller/Router）：稳重靠谱，负责接收请求、分发任务\n"
+            "- **厨师老王**（Service）：技术精湛，负责处理业务逻辑\n"
+            "- **档案管理员老墨**（Database）：记性好但说话慢，负责存取数据\n"
+            "- **备忘本小本**（Cache）：反应快，负责临时存储常用信息\n"
+            "- **传单员小李**（Queue）：负责排队处理任务，有条不紊\n\n"
+            "# 对话风格规则\n\n"
+            "1. **口语化表达**：\n"
+            "   - ✅ 「收到！」「搞定！」「稍等哈~」「查一下哈」\n"
+            "   - ✅ 「@档案管理员，帮我查下这个用户的信息」\n"
+            "   - ❌ 「请求已接收，正在处理数据...」\n"
+            "   - ❌ 「执行数据库查询操作中...」\n\n"
+            "2. **反映真实流程**：\n"
+            "   - 前端 → 服务员 → 厨师 → 档案管理员\n"
+            "   - 每条消息都要对应代码中的实际调用\n"
+            "   - codeRef 必须真实存在（如 routes.py:45）\n\n"
+            "3. **生活化比喻**：\n"
+            "   - 查询数据 → 「翻档案」「查账本」\n"
+            "   - 保存数据 → 「存档」「记下来」\n"
+            "   - 处理请求 → 「点单」「做菜」\n"
+            "   - 返回结果 → 「上菜」「打包好了」\n\n"
+            "4. **禁止技术黑话**（绝对不能出现）：\n"
+            "   - ❌ 「调用 API」「执行 SQL」「返回 JSON」\n"
+            "   - ❌ 「异步处理」「事务回滚」「索引命中」\n"
+            "   - ✅ 「传个话」「查一下档案」「刚才的订单先退回去」\n\n"
+            "# 场景选择优先级\n\n"
+            "1. **必选场景**（第一个）：最核心的业务流程（如：用户下单、用户登录）\n"
+            "2. **推荐场景**：数据查询、订单处理、消息推送\n"
+            "3. **避免场景**：配置加载、日志记录、健康检查\n\n"
+            "# Few-Shot 示例\n\n"
+            "## 示例：用户下单场景\n"
+            "```json\n"
             "[\n"
             "  {\n"
             '    "id": "scenario-0",\n'
-            '    "title": "用户付款",\n'
-            '    "description": "用户完成支付后，系统更新订单状态",\n'
+            '    "title": "用户下单",\n'
+            '    "description": "用户提交订单后，系统验证库存并创建订单",\n'
             '    "characters": [\n'
             '      {\n'
             '        "id": "fe",\n'
@@ -219,11 +308,76 @@ class ArchitectureService:
             '        "role": "Frontend",\n'
             '        "personality": "活泼开朗，负责展示界面",\n'
             '        "color": "bg-blue-100 text-blue-700 border-blue-300"\n'
+            "      },\n"
+            '      {\n'
+            '        "id": "ctrl",\n'
+            '        "name": "服务员阿强",\n'
+            '        "role": "Controller",\n'
+            '        "personality": "稳重靠谱，负责接收请求、分发任务",\n'
+            '        "color": "bg-purple-100 text-purple-700 border-purple-300"\n'
+            "      },\n"
+            '      {\n'
+            '        "id": "svc",\n'
+            '        "name": "厨师老王",\n'
+            '        "role": "Service",\n'
+            '        "personality": "技术精湛，负责处理业务逻辑",\n'
+            '        "color": "bg-green-100 text-green-700 border-green-300"\n'
+            "      },\n"
+            '      {\n'
+            '        "id": "db",\n'
+            '        "name": "档案管理员老墨",\n'
+            '        "role": "Database",\n'
+            '        "personality": "记性好但说话慢，负责存取数据",\n'
+            '        "color": "bg-orange-100 text-orange-700 border-orange-300"\n'
             "      }\n"
             "    ],\n"
-            '    "messages": []\n'
+            '    "messages": [\n'
+            "      {\n"
+            '        "id": "msg-0-0",\n'
+            '        "from": "fe",\n'
+            '        "to": "ctrl",\n'
+            '        "content": "用户刚刚点了「提交订单」按钮，订单信息我打包好了，你帮忙处理一下~",\n'
+            '        "codeRef": "frontend/src/pages/Order.tsx:88"\n'
+            "      },\n"
+            "      {\n"
+            '        "id": "msg-0-1",\n'
+            '        "from": "ctrl",\n'
+            '        "to": "svc",\n'
+            '        "content": "收到！我先检查一下订单格式对不对...嗯没问题，@厨师老王，这个订单交给你了！",\n'
+            '        "codeRef": "backend/app/api/routes.py:45"\n'
+            "      },\n"
+            "      {\n"
+            '        "id": "msg-0-2",\n'
+            '        "from": "svc",\n'
+            '        "to": "db",\n'
+            '        "content": "@档案管理员老墨，帮我查下这个商品还有没有库存？顾客要买 5 个呢",\n'
+            '        "codeRef": "backend/app/services/order_service.py:120"\n'
+            "      },\n"
+            "      {\n"
+            '        "id": "msg-0-3",\n'
+            '        "from": "db",\n'
+            '        "to": "svc",\n'
+            '        "content": "查到了...库存还有 10 个，够用。你要的订单信息我记下来了",\n'
+            '        "codeRef": "backend/app/repositories/product_repo.py:67"\n'
+            "      },\n"
+            "      {\n"
+            '        "id": "msg-0-4",\n'
+            '        "from": "svc",\n'
+            '        "to": "ctrl",\n'
+            '        "content": "库存没问题，订单创建成功！结果我发给你了",\n'
+            '        "codeRef": "backend/app/services/order_service.py:145"\n'
+            "      },\n"
+            "      {\n"
+            '        "id": "msg-0-5",\n'
+            '        "from": "ctrl",\n'
+            '        "to": "fe",\n'
+            '        "content": "搞定！订单号是 #12345，展示给用户看吧~",\n'
+            '        "codeRef": "backend/app/api/routes.py:52"\n'
+            "      }\n"
+            "    ]\n"
             "  }\n"
-            "]"
+            "]\n"
+            "```"
         )
 
         # 构建项目上下文
@@ -235,26 +389,31 @@ class ArchitectureService:
         )
 
         try:
+            logger.info("调用 LLM 生成场景剧本，文件数: %d", len(file_summaries))
             result = await llm_service.generate_json(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 temperature=0.8,
                 max_tokens=8000,
             )
+            logger.info("LLM 返回结果类型: %s", type(result))
 
             # 确保返回的是列表
             if isinstance(result, dict) and "scenarios" in result:
                 scenarios = result["scenarios"]
+                logger.info("从字典中提取 scenarios，数量: %d", len(scenarios))
             elif isinstance(result, list):
                 scenarios = result
+                logger.info("直接使用列表，数量: %d", len(scenarios))
             else:
+                logger.warning("LLM 返回格式异常，使用默认场景")
                 scenarios = []
 
             # 为每个场景添加必需的字段
             return self._enrich_scenarios_with_ids(scenarios)
 
         except LLMError as error:
-            logger.warning("LLM 场景生成失败，使用默认模板: %s", str(error))
+            logger.error("LLM 场景生成失败，使用默认模板: %s", str(error), exc_info=True)
             return self._generate_default_scenarios()
 
     async def _generate_tech_terms(
@@ -270,29 +429,83 @@ class ArchitectureService:
             术语列表
         """
         system_prompt = (
-            "你是一个技术翻译官，擅长把技术术语翻译成大白话。\n"
-            "你的任务是从项目的代码中提取技术术语，并给出生活化解释。\n\n"
-            "规则：\n"
-            "1. 识别项目中使用的关键技术术语（如 API、Database、async、JWT 等）\n"
-            "2. 每个术语包含：\n"
-            "   - id: 唯一标识\n"
-            "   - term: 术语名称\n"
-            "   - plainExplanation: 一句话白话解释\n"
-            "   - analogy: 生活化类比（以「就像...」开头）\n"
-            "   - relatedComponent: 相关的组件（可选）\n"
-            "3. 解释要简短有趣，像跟朋友聊天\n"
-            "4. 禁止使用技术黑话\n"
-            "5. 返回 JSON 格式的 techTerms 数组\n\n"
-            "返回格式示例：\n"
+            "# 角色\n"
+            "你是一位「技术小贴士」，专门把难懂的技术术语，翻译成小白也能听懂的「生活化解释」。\n"
+            "你的目标：当用户悬停在专业词汇上时，弹出一条通俗易懂的小贴士。\n\n"
+            "# 任务\n"
+            "从项目的代码中提取 5-8 个关键技术术语，为每个术语生成生活化的解释和类比。\n\n"
+            "# 术语选择优先级\n\n"
+            "1. **高频术语**（必选）：API、Database、Cache、JWT、async/await\n"
+            "2. **项目特有术语**：根据代码中的 imports 和使用频率选择\n"
+            "3. **避免选择**：基础语法（if/else/for）、变量名、函数名\n\n"
+            "# 解释规则\n\n"
+            "1. **plainExplanation（一句话解释）**：\n"
+            "   - 最多 30 字，简洁明了\n"
+            "   - 禁止技术黑话（如：接口、协议、同步、异步）\n"
+            "   - ✅ 「让不同软件互相沟通的工具」「临时存东西的地方」\n"
+            "   - ❌ 「应用程序接口」「异步编程模式」\n\n"
+            "2. **analogy（生活化类比）**：\n"
+            "   - 必须以「就像...」开头\n"
+            "   - 使用餐厅、商店、办公室等生活场景\n"
+            "   - ✅ 「就像餐厅的服务员，负责传话」\n"
+            "   - ✅ 「就像备忘本，记下常用的东西」\n"
+            "   - ❌ 「就像一个中间件...」\n\n"
+            "3. **relatedComponent（相关组件）**：\n"
+            "   - 指出这个术语在哪个组件里用到\n"
+            "   - 用生活化的名称（如：后端服务、订单处理）\n\n"
+            "4. **relatedFiles（关联代码文件）**：\n"
+            "   - 列出项目中使用了该术语的代码文件路径\n"
+            "   - 从项目代码结构中匹配真实存在的文件\n"
+            "   - 返回 1-3 个最相关的文件路径\n\n"
+            "# 标准术语库（优先使用）\n\n"
+            "| 术语 | plainExplanation | analogy |\n"
+            "|------|------------------|--------|\n"
+            "| API | 让不同软件互相沟通的工具 | 就像餐厅的服务员，负责传话 |\n"
+            "| Database | 存储和管理数据的系统 | 就像档案室，专门存档案 |\n"
+            "| Cache | 临时存储常用数据的地方 | 就像备忘本，记下常用的东西 |\n"
+            "| JWT | 身份验证的通行证 | 就像会员卡，证明你是谁 |\n"
+            "| async/await | 等待时去做别事的方式 | 就像点外卖，不用一直等 |\n"
+            "| Queue | 排队处理任务的机制 | 就像传单，按顺序处理 |\n"
+            "| Middleware | 请求经过的中转站 | 就像安检门，检查过才能进 |\n"
+            "| Repository | 管理数据存取的接口 | 就像档案管理员，负责找档案 |\n\n"
+            "# Few-Shot 示例\n\n"
+            "## 示例\n"
+            "```json\n"
             "[\n"
             "  {\n"
             '    "id": "term-0",\n'
             '    "term": "API",\n'
-            '    "plainExplanation": "应用程序接口，让不同软件之间可以互相沟通。",\n'
+            '    "plainExplanation": "让不同软件互相沟通的工具",\n'
             '    "analogy": "就像餐厅的服务员，负责传递客人的点单给厨房，再把做好的菜端给客人。",\n'
-            '    "relatedComponent": "后端服务"\n'
+            '    "relatedComponent": "后端服务",\n'
+            '    "relatedFiles": ["backend/app/api/routes.py"]\n'
+            "  },\n"
+            "  {\n"
+            '    "id": "term-1",\n'
+            '    "term": "Database",\n'
+            '    "plainExplanation": "存储和管理数据的系统",\n'
+            '    "analogy": "就像一个巨大的档案室，专门用来存储和管理所有的数据文件。",\n'
+            '    "relatedComponent": "数据存储层",\n'
+            '    "relatedFiles": ["backend/app/models/database.py"]\n'
+            "  },\n"
+            "  {\n"
+            '    "id": "term-2",\n'
+            '    "term": "async/await",\n'
+            '    "plainExplanation": "等待时去做别事的方式",\n'
+            '    "analogy": "就像点外卖，你下单后不用一直等，可以去做别的事，外卖好了再通知你。",\n'
+            '    "relatedComponent": "前端界面",\n'
+            '    "relatedFiles": ["frontend/src/services/api.ts"]\n'
+            "  },\n"
+            "  {\n"
+            '    "id": "term-3",\n'
+            '    "term": "JWT",\n'
+            '    "plainExplanation": "身份验证的通行证",\n'
+            '    "analogy": "就像会员卡，证明你是谁，可以享受哪些服务。",\n'
+            '    "relatedComponent": "用户认证",\n'
+            '    "relatedFiles": ["backend/app/services/auth_service.py"]\n'
             "  }\n"
-            "]"
+            "]\n"
+            "```"
         )
 
         # 构建项目上下文
@@ -304,26 +517,31 @@ class ArchitectureService:
         )
 
         try:
+            logger.info("调用 LLM 生成术语词典，文件数: %d", len(file_summaries))
             result = await llm_service.generate_json(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 temperature=0.6,
                 max_tokens=8000,
             )
+            logger.info("LLM 返回结果类型: %s", type(result))
 
             # 确保返回的是列表
             if isinstance(result, dict) and "techTerms" in result:
                 terms = result["techTerms"]
+                logger.info("从字典中提取 techTerms，数量: %d", len(terms))
             elif isinstance(result, list):
                 terms = result
+                logger.info("直接使用列表，数量: %d", len(terms))
             else:
+                logger.warning("LLM 返回格式异常，使用默认术语")
                 terms = []
 
             # 为每个术语添加必需的字段
             return self._enrich_terms_with_ids(terms)
 
         except LLMError as error:
-            logger.warning("LLM 术语生成失败，使用默认模板: %s", str(error))
+            logger.error("LLM 术语生成失败，使用默认模板: %s", str(error), exc_info=True)
             return self._generate_default_terms()
 
     def _build_project_context(

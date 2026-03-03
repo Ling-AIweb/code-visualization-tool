@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, BookOpen, Lightbulb, ChevronRight, X } from 'lucide-react'
+import { Search, BookOpen, Lightbulb, ChevronDown, FileCode2 } from 'lucide-react'
 import { TermExplanation } from '../types'
 
 interface TermDictionaryProps {
@@ -9,19 +9,15 @@ interface TermDictionaryProps {
 
 export default function TermDictionary({ terms, className = '' }: TermDictionaryProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedTerm, setSelectedTerm] = useState<TermExplanation | null>(null)
+  const [expandedTermId, setExpandedTermId] = useState<string | null>(null)
 
   const filteredTerms = terms.filter(term =>
     term.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
     term.laymanExplanation.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const handleTermClick = (term: TermExplanation) => {
-    setSelectedTerm(term)
-  }
-
-  const handleCloseDetail = () => {
-    setSelectedTerm(null)
+  const toggleExpand = (termName: string) => {
+    setExpandedTermId(prev => prev === termName ? null : termName)
   }
 
   return (
@@ -45,30 +41,129 @@ export default function TermDictionary({ terms, className = '' }: TermDictionary
       </div>
 
       {/* 术语列表 */}
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {filteredTerms.length > 0 ? (
-          filteredTerms.map((term, index) => (
-            <div
-              key={index}
-              onClick={() => handleTermClick(term)}
-              className={`card border-thin p-6 cursor-pointer transition-all duration-300 hover:border-white hover:bg-white hover:text-black ${
-                selectedTerm?.term === term.term ? 'bg-white text-black border-white' : ''
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <BookOpen className="w-5 h-5 flex-shrink-0" />
-                    <h3 className="text-xl font-bold">{term.term}</h3>
+          filteredTerms.map((term, index) => {
+            const isExpanded = expandedTermId === term.term
+            return (
+              <div
+                key={index}
+                className="card border-thin overflow-hidden transition-all duration-300"
+              >
+                {/* 折叠头部 - 点击展开/收起 */}
+                <div
+                  onClick={() => toggleExpand(term.term)}
+                  className="p-5 cursor-pointer transition-colors duration-200 hover:bg-black/[0.03]"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                        <BookOpen className="w-5 h-5 flex-shrink-0 opacity-70" />
+                        <h3 className="text-xl font-bold">{term.term}</h3>
+                        {/* 关联组件标签 */}
+                        {term.relatedComponent && (
+                          <span className="text-xs px-2.5 py-0.5 bg-white/10 border border-white/20 opacity-60">
+                            {term.relatedComponent}
+                          </span>
+                        )}
+                        {/* 关联文件标签 */}
+                        {term.relatedFiles && term.relatedFiles.length > 0 && (
+                          term.relatedFiles.map((filePath, fileIndex) => (
+                            <span
+                              key={fileIndex}
+                              className="text-xs px-2.5 py-0.5 bg-purple-500/15 border border-purple-400/30 text-purple-300 font-mono"
+                            >
+                              {filePath}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                      <p className="opacity-60 leading-relaxed text-sm pl-8">
+                        {term.laymanExplanation}
+                      </p>
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 flex-shrink-0 ml-4 opacity-40 transition-transform duration-300 ${
+                        isExpanded ? 'rotate-180' : ''
+                      }`}
+                    />
                   </div>
-                  <p className="opacity-70 leading-relaxed line-clamp-2">
-                    {term.laymanExplanation}
-                  </p>
                 </div>
-                <ChevronRight className="w-5 h-5 flex-shrink-0 mt-1" />
+
+                {/* 展开详情区域 */}
+                <div
+                  className={`transition-all duration-300 ease-in-out ${
+                    isExpanded
+                      ? 'max-h-[600px] opacity-100'
+                      : 'max-h-0 opacity-0'
+                  } overflow-hidden`}
+                >
+                  <div className="px-5 pb-5 border-t border-white/10">
+                    {/* 生活化类比 */}
+                    {term.analogy && (
+                      <div className="mt-4 p-4 bg-yellow-500/5 border border-yellow-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Lightbulb className="w-4 h-4 text-yellow-400" />
+                          <span className="text-sm font-semibold text-yellow-400">打个比方</span>
+                        </div>
+                        <p className="text-sm leading-relaxed opacity-80 pl-6">
+                          {term.analogy}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* 技术解释 */}
+                    {term.technicalExplanation && (
+                      <div className="mt-3 p-4 bg-white/5 border border-white/10">
+                        <h4 className="text-sm font-semibold mb-2 opacity-70">技术解释</h4>
+                        <p className="text-sm leading-relaxed opacity-60">
+                          {term.technicalExplanation}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* 关联代码文件 */}
+                    {term.relatedFiles && term.relatedFiles.length > 0 && (
+                      <div className="mt-3 p-4 bg-white/5 border border-white/10">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileCode2 className="w-4 h-4 opacity-70" />
+                          <h4 className="text-sm font-semibold opacity-70">关联代码文件</h4>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {term.relatedFiles.map((filePath, fileIndex) => (
+                            <span
+                              key={fileIndex}
+                              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-purple-500/10 border border-purple-400/25 text-purple-300 font-mono hover:bg-purple-500/20 transition-colors"
+                            >
+                              <FileCode2 className="w-3 h-3" />
+                              {filePath}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 实际应用示例 */}
+                    {term.examples && term.examples.length > 0 && (
+                      <div className="mt-3">
+                        <h4 className="text-sm font-semibold mb-2 opacity-70">实际应用</h4>
+                        <div className="space-y-2">
+                          {term.examples.map((example, exIndex) => (
+                            <div
+                              key={exIndex}
+                              className="p-3 bg-white/5 border border-white/10 text-sm"
+                            >
+                              <p className="opacity-70">{example}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))
+            )
+          })
         ) : (
           <div className="text-center py-12 opacity-40">
             <BookOpen className="w-12 h-12 mx-auto mb-4" />
@@ -76,71 +171,6 @@ export default function TermDictionary({ terms, className = '' }: TermDictionary
           </div>
         )}
       </div>
-
-      {/* 详细解释弹窗 */}
-      {selectedTerm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={handleCloseDetail}
-          />
-          <div className="relative bg-black border border-white/30 p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto animate-fade-in">
-            {/* 关闭按钮 */}
-            <button
-              onClick={handleCloseDetail}
-              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            {/* 术语标题 */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center">
-                  <BookOpen className="w-6 h-6" />
-                </div>
-                <h3 className="text-4xl font-bold">{selectedTerm.term}</h3>
-              </div>
-            </div>
-
-            {/* 生活化解释 */}
-            <div className="mb-8 p-6 bg-white/5 border border-white/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Lightbulb className="w-5 h-5 text-yellow-400" />
-                <h4 className="text-lg font-semibold">大白话解释</h4>
-              </div>
-              <p className="text-lg leading-relaxed">
-                {selectedTerm.laymanExplanation}
-              </p>
-            </div>
-
-            {/* 技术解释 */}
-            <div className="mb-8 p-6 bg-white/5 border border-white/20">
-              <h4 className="text-lg font-semibold mb-3">技术解释</h4>
-              <p className="text-lg leading-relaxed opacity-80">
-                {selectedTerm.technicalExplanation}
-              </p>
-            </div>
-
-            {/* 实例 */}
-            {selectedTerm.examples && selectedTerm.examples.length > 0 && (
-              <div>
-                <h4 className="text-lg font-semibold mb-3">实际应用</h4>
-                <div className="space-y-3">
-                  {selectedTerm.examples.map((example, index) => (
-                    <div
-                      key={index}
-                      className="p-4 bg-white/5 border border-white/10 rounded-none"
-                    >
-                      <p className="opacity-80">{example}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -103,8 +103,7 @@
 
   .card:hover {
     transform: translateY(-8px);
-    background-color: #FFFFFF;
-    color: #000000;
+    background-color: rgba(255, 255, 255, 0.08);
   }
 
   .card-static {

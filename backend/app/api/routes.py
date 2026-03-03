@@ -202,11 +202,18 @@ async def get_architecture_visualization(task_id: str):
             detail=task_status.get("message", "项目解析失败，请重新上传"),
         )
 
+    logger.info("获取架构可视化数据: task_id=%s", task_id)
+
     try:
         visualization = await architecture_service.generate_architecture_visualization(
             task_id
         )
+        logger.info("架构可视化数据获取成功: task_id=%s, layers=%d, scenarios=%d, techTerms=%d", 
+                   task_id, len(visualization.get("layers", [])), 
+                   len(visualization.get("scenarios", [])), 
+                   len(visualization.get("techTerms", [])))
     except ValueError as validation_error:
+        logger.error("架构可视化数据验证失败: %s", str(validation_error))
         raise HTTPException(status_code=404, detail=str(validation_error))
     except LLMError as llm_error:
         logger.error("LLM 调用失败: %s", str(llm_error))
@@ -263,9 +270,15 @@ async def get_project_details(task_id: str):
 
     # 获取架构可视化数据（包含群聊剧本和术语词典）
     try:
+        logger.info("开始获取架构可视化数据: task_id=%s", task_id)
         visualization = await architecture_service.generate_architecture_visualization(
             task_id
         )
+        logger.info("架构可视化数据获取成功: layers=%d, scenarios=%d, techTerms=%d",
+                   len(visualization.get("layers", [])),
+                   len(visualization.get("scenarios", [])),
+                   len(visualization.get("techTerms", [])))
+        
         # 取第一个场景作为默认群聊剧本
         scenarios = visualization.get("scenarios", [])
         if scenarios:
@@ -275,6 +288,12 @@ async def get_project_details(task_id: str):
                 "characters": first_scenario.get("characters", []),
                 "dialogues": first_scenario.get("messages", []),
             }
+            logger.info("群聊剧本设置成功: scenario='%s', characters=%d, dialogues=%d",
+                       first_scenario.get("title", ""),
+                       len(first_scenario.get("characters", [])),
+                       len(first_scenario.get("messages", [])))
+        else:
+            logger.warning("scenarios 列表为空，无法设置群聊剧本")
 
         # 术语词典
         tech_terms = visualization.get("techTerms", [])
@@ -288,8 +307,12 @@ async def get_project_details(task_id: str):
                 }
                 for term in tech_terms
             ]
+            logger.info("术语词典设置成功: terms=%d", len(tech_terms))
+        else:
+            logger.warning("techTerms 列表为空，无法设置术语词典")
     except (ValueError, LLMError) as error:
-        logger.warning("架构可视化数据获取失败: %s", str(error))
+        logger.error("架构可视化数据获取失败: %s", str(error), exc_info=True)
+        logger.warning("将返回空数据给前端，前端应显示友好提示")
 
     return ProjectDetailsResponse(**response_data)
 

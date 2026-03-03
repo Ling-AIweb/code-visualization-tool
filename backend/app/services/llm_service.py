@@ -21,8 +21,8 @@ class LLMService:
         self.api_key: str = settings.API_KEY
         self.api_base: str = settings.API_BASE.rstrip("/")
         self.model_name: str = settings.MODEL_NAME
-        self.timeout: float = 60.0
-        self.max_retries: int = 1
+        self.timeout: float = 180.0  # 增加到 3 分钟，处理大项目
+        self.max_retries: int = 2  # 增加重试次数
 
     @property
     def is_configured(self) -> bool:
@@ -69,18 +69,23 @@ class LLMService:
             "max_tokens": max_tokens,
         }
 
-        logger.info("LLM 请求: URL=%s, Model=%s, MaxTokens=%d", url, self.model_name, max_tokens)
+        logger.info("LLM 请求: URL=%s, Model=%s, MaxTokens=%d, Timeout=%.1fs", url, self.model_name, max_tokens, self.timeout)
+        logger.debug("请求消息数量: %d", len(messages))
 
         last_error: Optional[Exception] = None
 
         for attempt in range(self.max_retries + 1):
             try:
                 async with httpx.AsyncClient(timeout=self.timeout, verify=False) as client:
+                    logger.info("LLM 请求发送（尝试 %d/%d）", attempt + 1, self.max_retries + 1)
                     response = await client.post(url, json=payload, headers=headers)
                     logger.info("LLM 响应: Status=%d", response.status_code)
                     response.raise_for_status()
                     result = response.json()
-                    return result["choices"][0]["message"]["content"]
+                    content = result["choices"][0]["message"]["content"]
+                    logger.info("LLM 成功返回，内容长度: %d 字符", len(content))
+                    logger.debug("LLM 返回内容预览: %s", content[:200] if content else "空")
+                    return content
             except httpx.HTTPStatusError as error:
                 last_error = error
                 response_body = error.response.text[:500] if error.response else "N/A"
@@ -141,7 +146,10 @@ class LLMService:
             messages, temperature=temperature, max_tokens=max_tokens
         )
 
-        return validate_and_parse_json(raw_response)
+        logger.info("开始解析 JSON 响应，原始内容长度: %d", len(raw_response))
+        parsed = validate_and_parse_json(raw_response)
+        logger.info("JSON 解析成功，类型: %s", type(parsed))
+        return parsed
 
     async def summarize_code(self, code_content: str, file_path: str) -> str:
         """

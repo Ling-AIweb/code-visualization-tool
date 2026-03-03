@@ -95,6 +95,19 @@ export default function CodeUploadZone({ onUploadComplete }: CodeUploadZoneProps
     try {
       const response = await axios.post('/api/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 600000, // 10 分钟超时，大文件上传+解压需要时间
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const uploadPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            setCurrentUpload((previous) => ({
+              ...previous!,
+              progress: Math.min(uploadPercent, 20),
+              message: uploadPercent < 100 ? `正在上传... ${uploadPercent}%` : '上传完成，正在解压...',
+            }))
+          }
+        },
       })
 
       const { task_id: taskId, file_list: fileList } = response.data

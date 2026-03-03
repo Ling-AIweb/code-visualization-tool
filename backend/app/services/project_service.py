@@ -38,7 +38,7 @@ class ProjectService:
 
     async def upload_and_parse(self, file_content: bytes, filename: str) -> Dict[str, Any]:
         """
-        上传并解析项目文件（同步模式，返回文件列表）。
+        上传并解析项目文件（快速返回任务 ID，后台异步解析）。
 
         Args:
             file_content: ZIP 文件的字节内容
@@ -61,40 +61,41 @@ class ProjectService:
             raise ValueError("上传的文件不是有效的 ZIP 格式")
 
         task_id = str(uuid.uuid4())
-        temp_dir = f"/tmp/codestory_{task_id}"
 
+        # 快速从 ZIP 中读取文件列表（不解压到磁盘，避免阻塞）
+        file_list: List[str] = []
         try:
-            # 解压文件
-            os.makedirs(temp_dir, exist_ok=True)
             with zipfile.ZipFile(BytesIO(file_content), "r") as zip_ref:
-                zip_ref.extractall(temp_dir)
+                file_list = [
+                    name for name in zip_ref.namelist()
+                    if not name.endswith("/")
+                ]
+        except zipfile.BadZipFile:
+            raise ValueError("上传的文件不是有效的 ZIP 格式")
 
-            # 扫描目录结构，获取文件列表
-            file_list = self._scan_files(temp_dir)
+        logger.info("上传文件: %s, 大小: %.1fMB, 文件数: %d",
+                   filename, len(file_content) / 1024 / 1024, len(file_list))
 
-            # 保存任务数据（用于后续异步处理）
-            self.tasks[task_id] = {
-                "task_id": task_id,
-                "file_list": file_list,
-                "directory": temp_dir,
-                "status": "processing",
-                "progress": 0,
-                "message": "开始解析项目...",
-                "project_data": None,
-                "file_summaries": [],
-                "created_at": time.time(),
-            }
+        # 保存任务数据（用于后续异步处理）
+        self.tasks[task_id] = {
+            "task_id": task_id,
+            "file_list": file_list,
+            "directory": "",
+            "status": "processing",
+            "progress": 0,
+            "message": "开始解析项目...",
+            "project_data": None,
+            "file_summaries": [],
+            "created_at": time.time(),
+        }
 
-            # 启动后台异步解析任务
-            asyncio.create_task(self._parse_project(task_id, file_content, filename))
+        # 启动后台异步解析任务（解压只在这里做一次）
+        asyncio.create_task(self._parse_project(task_id, file_content, filename))
 
-            return {
-                "task_id": task_id,
-                "file_list": file_list
-            }
-
-        except Exception as error:
-            raise ValueError(f"解析失败: {str(error)}")
+        return {
+            "task_id": task_id,
+            "file_list": file_list[:100],  # 只返回前 100 个文件名，避免响应过大
+        }
 
     async def _parse_project(
         self, task_id: str, file_content: bytes, filename: str
@@ -104,14 +105,14 @@ class ProjectService:
 
         try:
             # Step 1: 解压文件
-            self._update_progress(task_id, 10, "正在解压文件...")
+            self._update_progress(task_id, 5, "正在解压文件...")
             os.makedirs(temp_dir, exist_ok=True)
 
             with zipfile.ZipFile(BytesIO(file_content), "r") as zip_ref:
                 zip_ref.extractall(temp_dir)
 
             # Step 2: 扫描目录结构
-            self._update_progress(task_id, 25, "正在扫描目录结构...")
+            self._update_progress(task_id, 15, "正在扫描目录结构...")
             project_tree = self._scan_directory(temp_dir)
 
             # 处理空目录
@@ -122,27 +123,46 @@ class ProjectService:
                 return
 
             # Step 3: 提取文件摘要（代码分片）
-            self._update_progress(task_id, 40, "正在提取代码摘要...")
+            self._update_progress(task_id, 25, "正在提取代码摘要...")
             file_summaries = scan_project_files(temp_dir)
+            logger.info("扫描完成，共发现 %d 个文件", len(file_summaries))
 
             # Step 4: 对源代码进行脱敏处理
-            self._update_progress(task_id, 50, "正在进行代码脱敏...")
+            self._update_progress(task_id, 35, "正在进行代码脱敏...")
             sanitized_summaries = self._sanitize_summaries(temp_dir, file_summaries)
 
-            # Step 5: 调用 LLM 生成白话摘要
-            self._update_progress(task_id, 60, "AI 正在翻阅代码，生成白话摘要...")
-            enriched_tree = await self._enrich_tree_with_summaries(
-                project_tree, sanitized_summaries
-            )
+            # Step 5: 优化后的 LLM 调用流程 - 分离执行并添加进度更新
+            self._update_progress(task_id, 45, "AI 正在生成白话摘要...")
+            
+            # 先执行白话摘要生成（添加超时保护）
+            try:
+                enriched_tree = await asyncio.wait_for(
+                    self._enrich_tree_with_summaries(project_tree, sanitized_summaries),
+                    timeout=120.0  # 2 分钟超时
+                )
+                self._update_progress(task_id, 65, "白话摘要生成完成，正在生成架构图...")
+            except asyncio.TimeoutError:
+                logger.warning("白话摘要生成超时，使用原始树结构")
+                enriched_tree = project_tree
+            except Exception as e:
+                logger.error("白话摘要生成失败: %s", str(e))
+                enriched_tree = project_tree
 
-            # Step 6: 调用 LLM 生成架构图
-            self._update_progress(task_id, 80, "正在生成架构图...")
-            mermaid_diagram = await self._generate_mermaid_with_llm(
-                sanitized_summaries
-            )
+            # 再执行架构图生成（添加超时保护）
+            try:
+                mermaid_diagram = await asyncio.wait_for(
+                    self._generate_mermaid_with_llm(sanitized_summaries),
+                    timeout=90.0  # 90 秒超时
+                )
+                self._update_progress(task_id, 80, "架构图生成完成...")
+            except asyncio.TimeoutError:
+                logger.warning("架构图生成超时，使用基础版")
+                mermaid_diagram = self._generate_fallback_mermaid(sanitized_summaries)
+            except Exception as e:
+                logger.error("架构图生成失败: %s", str(e))
+                mermaid_diagram = self._generate_fallback_mermaid(sanitized_summaries)
 
-            # Step 7: 保存结果
-            self._update_progress(task_id, 95, "正在整理结果...")
+            self._update_progress(task_id, 90, "正在整理结果...")
             self.tasks[task_id]["project_data"] = {
                 "tree": enriched_tree,
                 "mermaid_diagram": mermaid_diagram,
@@ -153,6 +173,7 @@ class ProjectService:
             self.tasks[task_id]["status"] = "completed"
             self.tasks[task_id]["progress"] = 100
             self.tasks[task_id]["message"] = "项目解析完成！"
+            logger.info("项目解析成功: task_id=%s", task_id)
 
         except Exception as error:
             logger.error("项目解析失败: %s", str(error), exc_info=True)
@@ -298,9 +319,9 @@ class ProjectService:
             and s.get("sanitized_preview", "").strip()
         ]
 
-        # 批量生成白话摘要（最多处理 20 个核心文件以控制成本）
+        # 批量生成白话摘要：保留 15 个核心文件确保质量
         if code_files_for_summary:
-            files_to_summarize = code_files_for_summary[:20]
+            files_to_summarize = code_files_for_summary[:15]
             summaries_text = await self._batch_summarize_files(files_to_summarize)
 
             for file_path, summary_text in summaries_text.items():
@@ -318,21 +339,21 @@ class ProjectService:
         """批量调用 LLM 为文件生成白话摘要"""
         result: Dict[str, str] = {}
 
-        # 构建批量摘要 prompt
+        # 构建批量摘要 prompt：保留足够的代码上下文确保质量
         files_description = ""
         for file_info in files:
-            preview = file_info.get("sanitized_preview", "")[:1500]
+            preview = file_info.get("sanitized_preview", "")[:1200]  # 保留 1200 字符确保理解
             classes = file_info.get("classes", [])
             functions = file_info.get("functions", [])
             methods = file_info.get("methods", [])
 
             files_description += f"\n--- 文件：{file_info['file_path']} ---\n"
             if classes:
-                files_description += f"类：{', '.join(classes)}\n"
+                files_description += f"类：{', '.join(classes)}\n"  # 保留所有类
             if functions:
-                files_description += f"函数：{', '.join(functions[:10])}\n"
+                files_description += f"函数：{', '.join(functions[:8])}\n"  # 保留前 8 个函数
             if methods:
-                files_description += f"方法：{', '.join(methods[:10])}\n"
+                files_description += f"方法：{', '.join(methods[:8])}\n"  # 保留前 8 个方法
             files_description += f"代码预览：\n{preview}\n"
 
         system_prompt = (
@@ -349,7 +370,7 @@ class ProjectService:
                 system_prompt=system_prompt,
                 user_prompt=f"请为以下代码文件生成白话摘要：\n{files_description}",
                 temperature=0.5,
-                max_tokens=8000,
+                max_tokens=6000,  # 保留 6000 确保输出质量
             )
             # parsed 应该是 {file_path: summary_text} 的字典
             for key, value in parsed.items():
@@ -383,9 +404,9 @@ class ProjectService:
         self, file_summaries: List[Dict[str, Any]]
     ) -> str:
         """调用 LLM 生成 Mermaid 架构图"""
-        # 构建项目结构描述
+        # 构建项目结构描述：保留足够信息确保架构图质量
         structure_description = "项目文件结构：\n"
-        for summary in file_summaries[:30]:
+        for summary in file_summaries[:25]:  # 保留 25 个文件
             classes = summary.get("classes", [])
             functions = summary.get("functions", [])
             methods = summary.get("methods", [])
@@ -418,7 +439,7 @@ class ProjectService:
                     {"role": "user", "content": structure_description},
                 ],
                 temperature=0.5,
-                max_tokens=1500,
+                max_tokens=1500,  # 保留 1500 确保架构图完整
             )
             # 清理可能的 markdown 标记
             cleaned = mermaid_code.strip()
